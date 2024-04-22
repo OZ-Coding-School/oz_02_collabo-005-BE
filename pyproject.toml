@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "okivery-be"
+version = "0.0.1"
+description = "okivery project"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.0.4"
+djangorestframework = "^3.15.1"
+pyjwt = "^2.8.0"
+djangorestframework-simplejwt = "^5.3.1"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
