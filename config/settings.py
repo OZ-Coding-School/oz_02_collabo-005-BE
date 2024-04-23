@@ -19,6 +19,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # env 사용 세팅
 import environ
 import os
+
+env = environ.Env(
+    DEBUG=(bool, False),
+)
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 
@@ -79,10 +83,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-
-env = environ.Env(
-    DEBUG=(bool, False),
-)
 
 DATABASES = {
     "default": {
