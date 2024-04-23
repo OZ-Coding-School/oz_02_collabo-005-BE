@@ -63,3 +63,24 @@ class CustomUserManagerTestCase(TestCase):
         self.assertEqual(user.name, name)
         self.assertEqual(user.phone_number, phone_number)
         self.assertEqual(user.birthday, birthday)
+
+class UserManagerTestCase(TestCase):
+    def setUp(self):
+        self.User = get_user_model()
+
+    def test_create_superuser(self):
+        # Create a superuser
+        user = self.User.objects.create_superuser(
+            email='admin@example.com',
+            password='adminpassword',
+            name='Admin User',
+            phone_number='1234567890',
+            birthday='1990-01-01'
+        )
+
+        # Check if the user is created and is_superuser is True
+        self.assertTrue(user.pk)
+        self.assertTrue(user.is_superuser)
+
+        # Check if the user's role is set properly
+        self.assertEqual(user.is_staff, 1)

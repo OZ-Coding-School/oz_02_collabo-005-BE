@@ -10,7 +10,9 @@ from common.models import CommonModel
 class UserManager(BaseUserManager):
     """사용자 모델 관리자로, 사용자 생성 및 관리를 처리합니다."""
 
-    def create_user(self, email, password, name, phone_number, birthday=None):
+    def create_user(
+        self, email, password, name, phone_number, birthday=None, **extra_fields
+    ):
         """이메일, 비밀번호 및 추가 필드를 사용하여 새로운 사용자를 생성하고 반환합니다.
 
         이메일이 제공되지 않을 경우 ValueError를 발생시킵니다.
@@ -23,24 +25,25 @@ class UserManager(BaseUserManager):
             raise ValueError("사용자는 이름를 가져야 합니다")
         if not phone_number:
             raise ValueError("사용자는 휴대폰 번호를 가져야 합니다")
-        
-        user = self.model(email=self.normalize_email(email),
-                        name=name,
-                        phone_number=phone_number,
-                        birthday=birthday)
+
+        user = self.model(
+            email=self.normalize_email(email),
+            name=name,
+            phone_number=phone_number,
+            birthday=birthday,
+        )
         user.set_password(password)
         user.save(using=self._db)
 
         return user
 
-    # def create_superuser(self, email, password):
-    #     """Create and return a new superuser."""
-    #     user = self.create_user(email, password)
-    #     user.is_staff = True
-    #     user.is_superuser = True
-    #     user.save(using=self._db)
+    def create_superuser(self, email, password, name, phone_number, birthday=None):
 
-    #     return user
+        user = self.create_user(email, password, name, phone_number, birthday)
+        user.is_superuser = True
+        user.is_staff = True  # Assuming role field represents the user's role
+        user.save(using=self._db)
+        return user
 
 
 class User(CommonModel, PermissionsMixin, AbstractBaseUser):
@@ -50,7 +53,7 @@ class User(CommonModel, PermissionsMixin, AbstractBaseUser):
     name = models.CharField(max_length=255)
     password = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=50)
-    role = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
     birthday = models.CharField(max_length=15)
     # is_deleted = models.BooleanField(default=False)
 
