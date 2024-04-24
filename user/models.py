@@ -54,7 +54,7 @@ class User(CommonModel, PermissionsMixin, AbstractBaseUser):
     password = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=50)
     is_staff = models.BooleanField(default=False)
-    birthday = models.CharField(max_length=15)
+    birthday = models.CharField(max_length=15, default=None, null=True)
     # is_deleted = models.BooleanField(default=False)
 
     objects = UserManager()
