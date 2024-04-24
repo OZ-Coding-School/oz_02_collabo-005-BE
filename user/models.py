@@ -66,7 +66,7 @@ class User(CommonModel, PermissionsMixin, AbstractBaseUser):
         return f"email: {self.email}, name: {self.name}"
 
 
-class Adress(CommonModel):
+class Address(CommonModel):
     """사용자의 주소를 나타내는 주소 모델"""
 
     name = models.CharField(max_length=50)
