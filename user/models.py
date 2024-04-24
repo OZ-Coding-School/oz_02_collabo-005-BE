@@ -54,7 +54,7 @@ class User(CommonModel, PermissionsMixin, AbstractBaseUser):
     password = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=50)
     is_staff = models.BooleanField(default=False)
-    birthday = models.CharField(max_length=15, null=True, default=None)
+    birthday = models.CharField(max_length=15, default=None, null=True)
     # is_deleted = models.BooleanField(default=False)
 
     objects = UserManager()
@@ -66,7 +66,7 @@ class User(CommonModel, PermissionsMixin, AbstractBaseUser):
         return f"email: {self.email}, name: {self.name}"
 
 
-class Adress(CommonModel):
+class Address(CommonModel):
     """사용자의 주소를 나타내는 주소 모델"""
 
     name = models.CharField(max_length=50)
