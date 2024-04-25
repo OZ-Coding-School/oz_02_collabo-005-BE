@@ -3,10 +3,13 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import User
-from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth import authenticate
 from .serializers import *
 from django.http import JsonResponse
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import UpdateAPIView
 import re
 
 
@@ -44,6 +47,33 @@ class UserCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserCreateView(APIView):
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            # jwt token 접근해주기
+            token = TokenObtainPairSerializer.get_token(user)
+            refresh_token = str(token)
+            access_token = str(token.access_token)
+            res = Response(
+                {
+                    "user": serializer.data,
+                    "message": "register successs",
+                    "token": {
+                        "access": access_token,
+                        "refresh": refresh_token,
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
+            # 쿠키에 넣어주기...아직 어떤식으로 해야될지 모르겠는데 이렇게 설정만 우선 해주었다.
+            res.set_cookie("access", access_token, httponly=True)
+            res.set_cookie("refresh", refresh_token, httponly=True)
+            return res
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class EmailCheckView(APIView):
     """
     이메일의 중복여부 체크 View
@@ -71,26 +101,93 @@ class EmailCheckView(APIView):
         return JsonResponse({"error": "Email parameter is missing"}, status=400)
 
 
-class LoginView(APIView):
-    """
-    여기서 사용자 이름과 비밀번호를 확인하여 유효성을 검사합니다.
-    만약 검증에 성공하면 사용자 정보를 가져오고, 아니면 에러 응답을 반환합니다.
-
-    예시로 사용자 정보를 가져오는 대신, 단순히 고정된 사용자를 사용합니다.
-    """
+class AuthView(APIView):
 
     def post(self, request):
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-
-        # 사용자 인증
-        user = authenticate(email=email, password=password)
+        user = authenticate(
+            email=request.data.get("email"), password=request.data.get("password")
+        )
         if user is not None:
-            # 사용자 인증 성공 시, 액세스 토큰 생성
-            access_token = AccessToken.for_user(user)
-            return Response({"access_token": str(access_token)})
-        else:
-            # 사용자 인증 실패 시
-            return Response(
-                {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
+            serializer = UserSerializer(user)
+            token = TokenObtainPairSerializer.get_token(user)
+            refresh_token = str(token)
+            access_token = str(token.access_token)
+            res = Response(
+                {
+                    "user": serializer.data,
+                    "message": "login success",
+                    "token": {
+                        "access": access_token,
+                        "refresh": refresh_token,
+                    },
+                },
+                status=status.HTTP_200_OK,
             )
+            return res
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutView(APIView):
+    authentication_classes = [JWTAuthentication]  # simple-jwt JWTAuthentication 사용
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        # 쿠키에 저장된 토큰 삭제 => 로그아웃 처리
+        response = Response(
+            {"message": "Logout success"}, status=status.HTTP_202_ACCEPTED
+        )
+        response.delete_cookie("access")
+        response.delete_cookie("refresh")
+        return response
+
+
+from django.contrib.auth.hashers import make_password
+
+
+class UpdateView(UpdateAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    authentication_classes = [JWTAuthentication]  # simple-jwt JWTAuthentication 사용
+    permission_classes = [IsAuthenticated]  # 인증된 사용자만 업데이트 가능
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        # 사용자 정보 업데이트 전에 토큰 검증을 수행합니다.
+        if not self.request.user.is_authenticated:
+            return Response(
+                {"error": "Invalid or missing token"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        # Serializer를 사용하여 데이터를 업데이트
+        serializer = self.get_serializer(
+            instance=self.get_object(), data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+
+class TestView(UpdateAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    authentication_classes = [JWTAuthentication]  # simple-jwt JWTAuthentication 사용
+    permission_classes = [IsAuthenticated]  # 인증된 사용자만 업데이트 가능
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        # 사용자 정보 업데이트 전에 토큰 검증을 수행합니다.
+        if not self.request.user.is_authenticated:
+            return Response(
+                {"error": "Invalid or missing token"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        # 사용자 정보를 업데이트하기 위해 부모 클래스의 update 메서드 호출
+        return super().update(request, *args, **kwargs)
