@@ -101,17 +101,24 @@ class EmailCheckView(APIView):
         return JsonResponse({"error": "Email parameter is missing"}, status=400)
 
 
-class AuthView(APIView):
+class LoginView(APIView):
+    """
+    회원가입 된 계정으로 로그인하는 View
+    """
 
     def post(self, request):
+        # email값과 password값 받기
         user = authenticate(
             email=request.data.get("email"), password=request.data.get("password")
         )
         if user is not None:
             serializer = UserSerializer(user)
+            # 받아온 유저 토큰 생성
             token = TokenObtainPairSerializer.get_token(user)
+            # settings -> restframe_work 부분에 timedelta로 유효기간 설정
             refresh_token = str(token)
             access_token = str(token.access_token)
+            # 유저 정보와 로그인, 토큰 값들 Response
             res = Response(
                 {
                     "user": serializer.data,
@@ -124,11 +131,13 @@ class AuthView(APIView):
                 status=status.HTTP_200_OK,
             )
             return res
+        # 받아온 유저의 값이 없을 시
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutView(APIView):
+    # Authorization의 토큰 값과 유저의 토큰 값이 일치하는지 확인
     authentication_classes = [JWTAuthentication]  # simple-jwt JWTAuthentication 사용
     permission_classes = [IsAuthenticated]
 
@@ -140,9 +149,6 @@ class LogoutView(APIView):
         response.delete_cookie("access")
         response.delete_cookie("refresh")
         return response
-
-
-from django.contrib.auth.hashers import make_password
 
 
 class UpdateView(UpdateAPIView):
