@@ -171,23 +171,16 @@ class UpdateView(UpdateAPIView):
 
         return Response(serializer.data)
 
+class DeleteView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
-class TestView(UpdateAPIView):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    authentication_classes = [JWTAuthentication]  # simple-jwt JWTAuthentication 사용
-    permission_classes = [IsAuthenticated]  # 인증된 사용자만 업데이트 가능
-
-    def get_object(self):
-        return self.request.user
-
-    def update(self, request, *args, **kwargs):
-        # 사용자 정보 업데이트 전에 토큰 검증을 수행합니다.
-        if not self.request.user.is_authenticated:
-            return Response(
-                {"error": "Invalid or missing token"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        # 사용자 정보를 업데이트하기 위해 부모 클래스의 update 메서드 호출
-        return super().update(request, *args, **kwargs)
+    def post(self, request):
+        try:
+            # 현재 인증된 사용자 가져오기
+            user = request.user
+            # 사용자 삭제
+            user.delete()
+            return Response({"message": "User data successfully deleted."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
