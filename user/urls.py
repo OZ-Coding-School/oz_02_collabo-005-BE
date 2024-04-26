@@ -3,7 +3,7 @@ from .views import *
 
 # api/v1/user/
 urlpatterns = [
-    # api/v1/user/create/
+    # api/v1/user/
     path("", UserCreateView.as_view(), name="user-create"),
     # api/v1/user/login/
     path("login/", LoginView.as_view(), name="user-login"),

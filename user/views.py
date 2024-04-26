@@ -1,16 +1,18 @@
-from django.shortcuts import render
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from .models import User
-from django.contrib.auth import authenticate
-from .serializers import *
+import re
+
 from django.http import JsonResponse
+from django.shortcuts import render
+from django.contrib.auth import authenticate
+from rest_framework import status
+from rest_framework.generics import UpdateAPIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import UpdateAPIView
-import re
+
+from .models import User
+from .serializers import *
 
 
 def check_email_format(email):
@@ -19,32 +21,6 @@ def check_email_format(email):
 
     # 이메일 주소를 정규 표현식과 비교하여 검증
     return re.match(pattern, email)
-
-
-class UserCreateView(APIView):
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data["email"]
-            password = serializer.validated_data["password"]
-            name = serializer.validated_data["name"]
-            phone_number = serializer.validated_data["phone_number"]
-            birthday = serializer.validated_data.get("birthday")
-
-            # 일반 사용자 생성
-            user = User.objects.create_user(
-                email=email,
-                password=password,
-                name=name,
-                phone_number=phone_number,
-                birthday=birthday,
-            )
-
-            # 혹은 슈퍼유저 생성
-            # user = User.objects.create_superuser(email=email, password=password, name=name, phone_number=phone_number, birthday=birthday)
-
-            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserCreateView(APIView):
@@ -72,6 +48,25 @@ class UserCreateView(APIView):
             res.set_cookie("refresh", refresh_token, httponly=True)
             return res
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        JWT_authenticator = JWTAuthentication()
+        is_validated_token = JWT_authenticator.authenticate(request)
+
+        if is_validated_token:
+
+            user = is_validated_token[0]
+            res = Response(
+                {
+                    "name": user.name,
+                    "eamil": user.email,
+                    "phone_number": user.phone_number,
+                    "birthday": user.birthday,
+                },
+                status=status.HTTP_200_OK,
+            )
+            return res
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class EmailCheckView(APIView):
@@ -177,6 +172,7 @@ class UpdateView(UpdateAPIView):
 
         return Response(serializer.data)
 
+
 class DeleteView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -187,6 +183,11 @@ class DeleteView(APIView):
             user = request.user
             # 사용자 삭제
             user.delete()
-            return Response({"message": "User data successfully deleted."}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "User data successfully deleted."},
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
-            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
