@@ -23,7 +23,7 @@ def check_email_format(email):
     return re.match(pattern, email)
 
 
-class UserCreateView(APIView):
+class UserView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -191,3 +191,26 @@ class DeleteView(APIView):
             return Response(
                 {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class AddressView(APIView):
+    # Authorization의 토큰 값과 유저의 토큰 값이 일치하는지 확인
+
+    def post(self, request):
+        JWT_authenticator = JWTAuthentication()
+        is_validated_token = JWT_authenticator.authenticate(request)
+        if is_validated_token:
+            user = is_validated_token[0]
+            request.data["user_id"] = user.id
+            serializer = AddressSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.create(request.data)
+                res = Response(
+                    {
+                        "address": serializer.data,
+                        "message": "address create success",
+                    },
+                    status=status.HTTP_200_OK,
+                )
+                return res
+        return Response(status=status.HTTP_400_BAD_REQUEST)
