@@ -4,7 +4,7 @@ from .views import *
 # api/v1/user/
 urlpatterns = [
     # api/v1/user/
-    path("", UserCreateView.as_view(), name="user-create"),
+    path("", UserView.as_view(), name="user"),
     # api/v1/user/login/
     path("login/", LoginView.as_view(), name="user-login"),
     # api/v1/user/logout/
@@ -15,4 +15,6 @@ urlpatterns = [
     path("delete/", DeleteView.as_view(), name="user-delete"),
     # api/v1/user/check?email=test@naver.com
     path("check/", EmailCheckView.as_view(), name="user-email-check"),
+    # api/v1/user/address/
+    path("address/", AddressView.as_view(), name="user-address"),
 ]
