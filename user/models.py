@@ -77,5 +77,5 @@ class Address(CommonModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["user", "name"], name="name of constraint")
+            models.UniqueConstraint(fields=["user", "name"], name="unique_constraint")
         ]
