@@ -15,7 +15,7 @@
 ---
 ## :link: 링크
 
-> ### [💻 FE Repository](https://github.com/OZ-Coding-School/oz_02_collabo-005-FE)
+> ### [💻 FE Repository](https://github.com/OZ-Coding-School/oz_02_collabo-005)
 
 ---
 ## 🗣️ 프로젝트 발표 영상 & 발표 문서
@@ -132,7 +132,8 @@ git push origin feat/sub-blind#이슈번호
 # PR 한 뒤 사용한 branch 삭제
 git switch dev
 git branch -D feat/sub-blind#이슈번호
-
+# origin 브랜치 삭제
+git push -d origin 브랜치명
 ```
 
 ### Git Convention
