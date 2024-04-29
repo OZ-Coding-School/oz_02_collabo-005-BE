@@ -220,7 +220,7 @@ class AddressView(APIView):
                 )
                 return res
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    
+
     def get(self, request):
         """
         주소 유무에 따른 사용자 주소 조회 API
@@ -234,16 +234,35 @@ class AddressView(APIView):
             address = Address.objects.filter(user=user.id).last()
             if address:
                 res = {
-                        "name": address.name,
-                        "base": address.base,
-                        "detail": address.detail,
-                    }
+                    "name": address.name,
+                    "base": address.base,
+                    "detail": address.detail,
+                }
 
                 stat = status.HTTP_200_OK
             else:
-                res = {
-                    "error": "등록된 주소가 없습니다." 
-                }
+                res = {"error": "등록된 주소가 없습니다."}
                 stat = status.HTTP_400_BAD_REQUEST
             return Response(res, stat)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class AddressUpdateView(APIView):
+
+    def post(self, request):
+        JWT_authenticator = JWTAuthentication()
+        is_validated_token = JWT_authenticator.authenticate(request)
+
+        if is_validated_token:
+            user = is_validated_token[0]
+            address = Address.objects.filter(user=user.id).last()
+
+            if address:
+                serializer = AddressSerializer(address, data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
         return Response(status=status.HTTP_400_BAD_REQUEST)
