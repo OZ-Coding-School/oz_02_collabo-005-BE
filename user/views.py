@@ -194,14 +194,20 @@ class DeleteView(APIView):
 
 
 class AddressView(APIView):
-    # Authorization의 토큰 값과 유저의 토큰 값이 일치하는지 확인
+    """
+    주소 생성 및 조회 API
+    """
 
     def post(self, request):
+        """
+        토큰 검증 이후 주소 생성 API
+        """
         JWT_authenticator = JWTAuthentication()
         is_validated_token = JWT_authenticator.authenticate(request)
         if is_validated_token:
             user = is_validated_token[0]
             request.data["user_id"] = user.id
+            # request.data["name"] = "home"
             serializer = AddressSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.create(request.data)
@@ -213,4 +219,31 @@ class AddressView(APIView):
                     status=status.HTTP_200_OK,
                 )
                 return res
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    def get(self, request):
+        """
+        주소 유무에 따른 사용자 주소 조회 API
+        """
+
+        JWT_authenticator = JWTAuthentication()
+        is_validated_token = JWT_authenticator.authenticate(request)
+
+        if is_validated_token:
+            user = is_validated_token[0]
+            address = Address.objects.filter(user=user.id).last()
+            if address:
+                res = {
+                        "name": address.name,
+                        "base": address.base,
+                        "detail": address.detail,
+                    }
+
+                stat = status.HTTP_200_OK
+            else:
+                res = {
+                    "error": "등록된 주소가 없습니다." 
+                }
+                stat = status.HTTP_400_BAD_REQUEST
+            return Response(res, stat)
         return Response(status=status.HTTP_400_BAD_REQUEST)
