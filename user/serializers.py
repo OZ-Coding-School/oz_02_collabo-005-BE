@@ -28,13 +28,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AddressSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Address
         fields = ["name", "base", "detail", "user_id"]
         depth = 1
 
     def create(self, validated_data):
-        print("validated_data", validated_data)
         address = Address.objects.create(**validated_data)
 
         return address
