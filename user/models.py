@@ -69,8 +69,12 @@ class User(CommonModel, PermissionsMixin, AbstractBaseUser):
 class Address(CommonModel):
     """사용자의 주소를 나타내는 주소 모델"""
 
-    name = models.CharField(max_length=50)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     base = models.CharField(max_length=255)
     detail = models.CharField(max_length=255)
+    name = models.CharField(max_length=50)
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "name"], name="name of constraint")
+        ]

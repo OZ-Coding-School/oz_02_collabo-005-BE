@@ -1,5 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.utils import timezone
+from .models import User, Address
 
 
 class CustomUserManagerTestCase(TestCase):
@@ -64,23 +67,57 @@ class CustomUserManagerTestCase(TestCase):
         self.assertEqual(user.phone_number, phone_number)
         self.assertEqual(user.birthday, birthday)
 
+
 class UserManagerTestCase(TestCase):
     def setUp(self):
         self.User = get_user_model()
 
     def test_create_superuser(self):
-        # Create a superuser
         user = self.User.objects.create_superuser(
-            email='admin@example.com',
-            password='adminpassword',
-            name='Admin User',
-            phone_number='1234567890',
-            birthday='1990-01-01'
+            email="admin@example.com",
+            password="adminpassword",
+            name="Admin User",
+            phone_number="1234567890",
+            birthday="1990-01-01",
         )
 
-        # Check if the user is created and is_superuser is True
         self.assertTrue(user.pk)
         self.assertTrue(user.is_superuser)
 
-        # Check if the user's role is set properly
         self.assertEqual(user.is_staff, 1)
+
+
+class AddressTestCase(TestCase):
+    def setUp(self):
+        """사용자 생성"""
+        self.user = User.objects.create_user(
+            email="test@example.com",
+            password="password",
+            name="John Doe",
+            phone_number="1234567890",
+            birthday="1990-01-01",
+        )
+
+        """주소 생성"""
+        self.address = Address.objects.create(
+            user=self.user, base="123 Street", detail="Apt 101", name="Home"
+        )
+
+    def test_address_created(self):
+        """주소가 정상적으로 생성되었는지 확인"""
+        self.assertEqual(Address.objects.count(), 1)
+        saved_address = Address.objects.first()
+        self.assertEqual(saved_address.user, self.user)
+        self.assertEqual(saved_address.base, "123 Street")
+        self.assertEqual(saved_address.detail, "Apt 101")
+        self.assertEqual(saved_address.name, "Home")
+
+    def test_unique_address_name_per_user(self):
+        """동일한 사용자에 대해 중복된 이름의 주소 생성 시도"""
+        with self.assertRaises(Exception):
+            Address.objects.create(
+                user=self.user,
+                base="456 Avenue",
+                detail="Unit 202",
+                name="Home" """같은 이름으로 생성""",
+            )
