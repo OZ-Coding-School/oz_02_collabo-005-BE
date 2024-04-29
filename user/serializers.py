@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, Address
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
-    
+
     def update(self, instance, validated_data):
         # 비밀번호가 업데이트되는 경우에 대한 처리
         password = validated_data.pop("password", None)
@@ -25,3 +25,16 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
 
         return super().update(instance, validated_data)
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ["name", "base", "detail", "user_id"]
+        depth = 1
+
+    def create(self, validated_data):
+        print("validated_data", validated_data)
+        address = Address.objects.create(**validated_data)
+
+        return address
