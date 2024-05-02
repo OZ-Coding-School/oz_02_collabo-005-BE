@@ -74,6 +74,7 @@ class RestaurantGetListView(APIView):
             return Response(response_data, stat)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
 class RestaurantGetDetailView(APIView):
     def get(self, request):
         # 토큰 인증
@@ -87,73 +88,69 @@ class RestaurantGetDetailView(APIView):
             # restaurant_id가 있다면 try 없으면 except(예외 처리)
             if restaurant_id:
                 try:
-                    restaurants = Restaurant.objects.get(id=restaurant_id)
+                    restaurant = Restaurant.objects.get(id=restaurant_id)
                 except Restaurant.DoesNotExist:
-                    return Response({"error": "Restaurant not found"}, status=status.HTTP_404_NOT_FOUND)
-
-                
-                # Restaurant 테이블에서 id, name, picture값을 가져온다
-                restaurants = Restaurant.objects.filter(id=restaurant_id).values(
-                    "id",
-                    "name",
-                    "representative_menu_picture",
-                    "description",
-                    "delivery_fee",
-                )
+                    return Response(
+                        {"error": "Restaurant not found"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
 
                 response_data = []  # 전체 데이터
-                for restaurant in restaurants:
-                    menu_group_list = []
+                menu_group_list = []
 
-                    # Restaurant_id 가 같은 Menu_group_id를 가져온다
-                    menu_group_ids = Menu_group.objects.filter(
-                        restaurant=restaurant["id"]
-                    ).values("id")
+                # Restaurant_id 가 같은 Menu_group_id를 가져온다
+                menu_group_ids = Menu_group.objects.filter(
+                    restaurant=restaurant.id
+                ).values("id")
 
-                    for menu_group in menu_group_ids:
-                        menu_list = []
+                for menu_group in menu_group_ids:
+                    menu_list = []
 
-                        menu_group_id = menu_group["id"]
+                    menu_group_id = menu_group["id"]
 
-                        # Menu_group에서 description의 값들을 가져온다.
-                        menu_group_value = (
-                            Menu_group.objects.filter(id=menu_group_id)
-                            .values("description")
-                            .first()
+                    # Menu_group에서 description의 값들을 가져온다.
+                    menu_group_value = (
+                        Menu_group.objects.filter(id=menu_group_id)
+                        .values("description")
+                        .first()
+                    )
+                    # description이라는 컬럼이 있는 데이터들의 값만 가져온다
+                    if menu_group_value:
+                        # 컬럼 형식에서 description의 내용만 가져온다.
+                        menu_group_description = menu_group_value["description"]
+
+                        # Menu_group과 같은 방식으로 Menu의 컬럼들의 데이터를 가져온다.
+                        # Menu_group_id와 같은 Menu_id를 가지고 있는 데이터들을 queryset으로 나눈다.
+                        menus = Menu.objects.filter(menu_group=menu_group_id).values(
+                            "id", "picture", "name", "price", "description"
                         )
-                        # description이라는 컬럼이 있는 데이터들의 값만 가져온다
-                        if menu_group_value:
-                            # 컬럼 형식에서 description의 내용만 가져온다.
-                            menu_group_description = menu_group_value["description"]
 
-                            # Menu_group과 같은 방식으로 Menu의 컬럼들의 데이터를 가져온다.
-                            # Menu_group_id와 같은 Menu_id를 가지고 있는 데이터들을 queryset으로 나눈다.
-                            menus = Menu.objects.filter(menu_group=menu_group_id).values(
-                                "id", "picture", "name", "price", "description"
-                            )
+                        # menus에서 가져온 데이터를 하나씩 menu_list에 추가한다
+                        for menu in menus:
+                            menu_list.append(menu)
+                        # Menu_group에 description 데이터를 가져오고 Menu에서 가져온 각 데이터들을
+                        # menu_group_data에 튜플 형태로 넣어준다.
+                        menu_group_data = {
+                            "description": menu_group_description,
+                            "menus": menu_list,
+                        }
+                        menu_group_list.append(menu_group_data)
 
-                            # menus에서 가져온 데이터를 하나씩 menu_list에 추가한다
-                            for menu in menus:
-                                menu_list.append(menu)
-
-                            # Menu_group에 description 데이터를 가져오고 Menu에서 가져온 각 데이터들을
-                            # menu_group_data에 튜플 형태로 넣어준다.
-                            menu_group_data = {
-                                "description": menu_group_description,
-                                "menus": menu_list,
-                            }
-                            menu_group_list.append(menu_group_data)
-
-                    res = {
-                        "name": restaurant["name"],
-                        "image": restaurant["representative_menu_picture"],
-                        "description": restaurant["description"],
-                        "delivery_fee": f"free delivery minimum fee {restaurant["delivery_fee"]}원",
-                        "menu_group_list": menu_group_list,
-                    }
-                    response_data.append(res)
-                return Response(response_data)
+                res = {
+                    "id": restaurant.id,
+                    "name": restaurant.name,
+                    "image": restaurant.representative_menu_picture,
+                    "description": restaurant.description,
+                    "delivery_fee": restaurant.delivery_fee,
+                    "menu_group_list": menu_group_list,
+                }
+                return Response(res, status=status.HTTP_200_OK)
             else:
-                return Response({"error": "restaurantId parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "restaurantId parameter is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         else:
-            return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
+            )
