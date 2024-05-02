@@ -5,4 +5,5 @@ from .views import *
 urlpatterns = [
     # api/v1/restaurant/list/
     path("list/", RestaurantGetListView.as_view(), name="restaurant-list"),
+    path("menu/list", RestaurantGetDetailView.as_view(), name="test-view"),
 ]
