@@ -8,6 +8,7 @@ class RestaurantModelTestCase(TestCase):
         name = "Test Restaurant"
         representative_menu = 1
         representative_menu_picture = "http://example.com/menu.jpg"
+        logo = "http://example.com/logo.jpg"
         description = "This is a test restaurant."
         notice = "Test notice."
         delivery_fee = 5000
@@ -21,6 +22,7 @@ class RestaurantModelTestCase(TestCase):
             name=name,
             representative_menu=representative_menu,
             representative_menu_picture=representative_menu_picture,
+            logo=logo,
             description=description,
             notice=notice,
             delivery_fee=delivery_fee,
@@ -36,6 +38,7 @@ class RestaurantModelTestCase(TestCase):
         self.assertEqual(
             restaurant.representative_menu_picture, representative_menu_picture
         )
+        self.assertEqual(restaurant.logo, logo)
         self.assertEqual(restaurant.description, description)
         self.assertEqual(restaurant.notice, notice)
         self.assertEqual(restaurant.delivery_fee, delivery_fee)
@@ -51,6 +54,7 @@ class RestaurantModelTestCase(TestCase):
             name="Test Restaurant",
             representative_menu=1,
             representative_menu_picture="http://example.com/menu.jpg",
+            logo="http://example.com/logo.jpg",
             description="This is a test restaurant.",
             notice="Test notice.",
             delivery_fee=5000,
