@@ -1,6 +1,5 @@
--- 사용자 데이터 삽입 쿼리
-INSERT INTO user (email, name, password, phone_number, birthday, is_superuser, is_staff, created_at, updated_at, deleted_at)
-VALUES 
+INSERT INTO user_user (email, name, password, phone_number, birthday, is_superuser, is_staff, created_at, updated_at, deleted_at)
+VALUES
     ('user1@example.com', 'User1', 'password1', '01012345678', '1990-01-01', TRUE, TRUE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
     ('user2@example.com', 'User2', 'password2', '01055555555', '1995-05-05', TRUE, TRUE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
     ('user3@example.com', 'User3', 'password3', '01077777777', NULL, FALSE, FALSE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
@@ -18,12 +17,11 @@ VALUES
     ('user15@example.com', 'User15', 'password15', '01043215432', '1993-07-10', TRUE, TRUE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
     ('user16@example.com', 'User16', 'password16', '01098765432', '2000-02-18', FALSE, FALSE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
     ('user17@example.com', 'User17', 'password17', '01023456789', NULL, TRUE, TRUE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('user18@example.com', 'User18', 'password18', '01087654321', NULL, FALSE, FALSE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL)
+    ('user18@example.com', 'User18', 'password18', '01087654321', NULL, FALSE, FALSE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('user19@example.com', 'User19', 'password19', '01087651234', NULL, TRUE, TRUE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('user20@example.com', 'User20', 'password20', '01087655678', NULL, FALSE, FALSE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
 
-
-
--- 주소 데이터 삽입 쿼리
-INSERT INTO address_address (user_id, name, base, detail, created_at, updated_at, deleted_at)
+INSERT INTO user_address (user_id, name, base, detail, created_at, updated_at, deleted_at)
 VALUES 
     (1, 'Home', '123 Street', 'Apt 101', '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
     (2, 'Home', '456 Avenue', 'Unit 202', '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
@@ -46,42 +44,28 @@ VALUES
     (19, 'Home', '202 Boulevard', 'Floor 2', '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
     (20, 'Home', '303 Lane', 'Room 303', '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
 
-INSERT INTO restaurant_restaurant (
-    name,
-    representative_menu,
-    representative_menu_picture,
-    description,
-    notice,
-    delivery_fee,
-    minimum_order_amount,
-    opening_time,
-    closing_time,
-    status,
-    created_at,
-    updated_at,
-    deleted_at
-)
+INSERT INTO restaurant_restaurant (name, logo, representative_menu, representative_menu_picture, description, notice, delivery_fee, minimum_order_amount, opening_time, closing_time, status, created_at, updated_at, deleted_at)
 VALUES 
-    ('Restaurant A', 1, 'http://example.com/menu1.jpg', 'Description for Restaurant A', 'Notice for Restaurant A', 5000, 20000, '09:00:00', '21:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant B', 2, 'http://example.com/menu2.jpg', 'Description for Restaurant B', 'Notice for Restaurant B', 4000, 25000, '10:00:00', '22:00:00', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant C', 3, 'http://example.com/menu3.jpg', 'Description for Restaurant C', 'Notice for Restaurant C', 6000, 18000, '08:00:00', '20:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant D', 4, 'http://example.com/menu4.jpg', 'Description for Restaurant D', 'Notice for Restaurant D', 5500, 22000, '11:00:00', '23:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant E', 5, 'http://example.com/menu5.jpg', 'Description for Restaurant E', 'Notice for Restaurant E', 4800, 19000, '07:00:00', '19:00:00', 3, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant F', 6, 'http://example.com/menu6.jpg', 'Description for Restaurant F', 'Notice for Restaurant F', 5200, 21000, '09:00:00', '21:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant G', 7, 'http://example.com/menu7.jpg', 'Description for Restaurant G', 'Notice for Restaurant G', 5900, 23000, '10:00:00', '22:00:00', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant H', 8, 'http://example.com/menu8.jpg', 'Description for Restaurant H', 'Notice for Restaurant H', 5100, 24000, '12:00:00', '23:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant I', 9, 'http://example.com/menu9.jpg', 'Description for Restaurant I', 'Notice for Restaurant I', 4600, 20000, '08:00:00', '20:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant J', 10, 'http://example.com/menu10.jpg', 'Description for Restaurant J', 'Notice for Restaurant J', 5400, 21000, '10:00:00', '22:00:00', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant K', 11, 'http://example.com/menu11.jpg', 'Description for Restaurant K', 'Notice for Restaurant K', 5800, 23000, '11:00:00', '23:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant L', 12, 'http://example.com/menu12.jpg', 'Description for Restaurant L', 'Notice for Restaurant L', 4900, 19000, '07:00:00', '19:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant M', 13, 'http://example.com/menu13.jpg', 'Description for Restaurant M', 'Notice for Restaurant M', 5000, 22000, '09:00:00', '21:00:00', 3, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant N', 14, 'http://example.com/menu14.jpg', 'Description for Restaurant N', 'Notice for Restaurant N', 5700, 25000, '10:00:00', '22:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant O', 15, 'http://example.com/menu15.jpg', 'Description for Restaurant O', 'Notice for Restaurant O', 5200, 20000, '11:00:00', '23:00:00', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant P', 16, 'http://example.com/menu16.jpg', 'Description for Restaurant P', 'Notice for Restaurant P', 4800, 21000, '09:00:00', '21:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant Q', 17, 'http://example.com/menu17.jpg', 'Description for Restaurant Q', 'Notice for Restaurant Q', 5300, 23000, '12:00:00', '23:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant R', 18, 'http://example.com/menu18.jpg', 'Description for Restaurant R', 'Notice for Restaurant R', 5600, 21000, '08:00:00', '20:00:00', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant S', 19, 'http://example.com/menu19.jpg', 'Description for Restaurant S', 'Notice for Restaurant S', 4900, 18000, '09:00:00', '21:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    ('Restaurant T', 20, 'http://example.com/menu20.jpg', 'Description for Restaurant T', 'Notice for Restaurant T', 5500, 24000, '10:00:00', '22:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
+    ('Restaurant A', 'http://example.com/logo1.jpg', 1, 'http://example.com/menu1.jpg', 'Description for Restaurant A', 'Notice for Restaurant A', 5000, 20000, '09:00:00', '21:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant B', 'http://example.com/logo2.jpg', 2, 'http://example.com/menu2.jpg', 'Description for Restaurant B', 'Notice for Restaurant B', 4000, 25000, '10:00:00', '22:00:00', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant C', 'http://example.com/logo3.jpg', 3, 'http://example.com/menu3.jpg', 'Description for Restaurant C', 'Notice for Restaurant C', 6000, 18000, '08:00:00', '20:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant D', 'http://example.com/logo4.jpg', 4, 'http://example.com/menu4.jpg', 'Description for Restaurant D', 'Notice for Restaurant D', 5500, 22000, '11:00:00', '23:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant E', 'http://example.com/logo5.jpg', 5, 'http://example.com/menu5.jpg', 'Description for Restaurant E', 'Notice for Restaurant E', 4800, 19000, '07:00:00', '19:00:00', 3, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant F', 'http://example.com/logo6.jpg', 6, 'http://example.com/menu6.jpg', 'Description for Restaurant F', 'Notice for Restaurant F', 5200, 21000, '09:00:00', '21:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant G', 'http://example.com/logo7.jpg', 7, 'http://example.com/menu7.jpg', 'Description for Restaurant G', 'Notice for Restaurant G', 5900, 23000, '10:00:00', '22:00:00', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant H', 'http://example.com/logo8.jpg', 8, 'http://example.com/menu8.jpg', 'Description for Restaurant H', 'Notice for Restaurant H', 5100, 24000, '12:00:00', '24:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant I', 'http://example.com/logo9.jpg', 9, 'http://example.com/menu9.jpg', 'Description for Restaurant I', 'Notice for Restaurant I', 4600, 20000, '08:00:00', '20:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant J', 'http://example.com/logo10.jpg', 10, 'http://example.com/menu10.jpg', 'Description for Restaurant J', 'Notice for Restaurant J', 5400, 21000, '10:00:00', '22:00:00', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant K', 'http://example.com/logo11.jpg', 11, 'http://example.com/menu11.jpg', 'Description for Restaurant K', 'Notice for Restaurant K', 5800, 23000, '11:00:00', '23:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant L', 'http://example.com/logo12.jpg', 12, 'http://example.com/menu12.jpg', 'Description for Restaurant L', 'Notice for Restaurant L', 4900, 19000, '07:00:00', '19:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant M', 'http://example.com/logo13.jpg', 13, 'http://example.com/menu13.jpg', 'Description for Restaurant M', 'Notice for Restaurant M', 5000, 22000, '09:00:00', '21:00:00', 3, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant N', 'http://example.com/logo14.jpg', 14, 'http://example.com/menu14.jpg', 'Description for Restaurant N', 'Notice for Restaurant N', 5700, 25000, '10:00:00', '22:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant O', 'http://example.com/logo15.jpg', 15, 'http://example.com/menu15.jpg', 'Description for Restaurant O', 'Notice for Restaurant O', 5200, 20000, '11:00:00', '23:00:00', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant P', 'http://example.com/logo16.jpg', 16, 'http://example.com/menu16.jpg', 'Description for Restaurant P', 'Notice for Restaurant P', 4800, 21000, '09:00:00', '21:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant Q', 'http://example.com/logo17.jpg', 17, 'http://example.com/menu17.jpg', 'Description for Restaurant Q', 'Notice for Restaurant Q', 5300, 23000, '12:00:00', '24:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant R', 'http://example.com/logo18.jpg', 18, 'http://example.com/menu18.jpg', 'Description for Restaurant R', 'Notice for Restaurant R', 5600, 21000, '08:00:00', '20:00:00', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant S', 'http://example.com/logo19.jpg', 19, 'http://example.com/menu19.jpg', 'Description for Restaurant S', 'Notice for Restaurant S', 4900, 18000, '09:00:00', '21:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    ('Restaurant T', 'http://example.com/logo20.jpg', 20, 'http://example.com/menu20.jpg', 'Description for Restaurant T', 'Notice for Restaurant T', 5500, 24000, '10:00:00', '22:00:00', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
 
 INSERT INTO restaurant_hashtag (hashtag, created_at, updated_at, deleted_at)
 VALUES 
@@ -200,26 +184,95 @@ VALUES
     (19, 'Description for Menu Group 19', '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
     (20, 'Description for Menu Group 20', '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
 
-INSERT INTO restaurant_menu (restaurant_id, menu_group_id, name, price, picture, description, status, created_at, updated_at, deleted_at)
+INSERT INTO restaurant_menu (restaurant_id, menu_group_id, represent, name, price, picture, description, status, created_at, updated_at, deleted_at)
 VALUES 
-    (1, 1, 'Menu 1', 10000, 'http://example.com/menu1.jpg', 'Description for Menu 1', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (2, 2, 'Menu 2', 12000, 'http://example.com/menu2.jpg', 'Description for Menu 2', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (3, 3, 'Menu 3', 11000, 'http://example.com/menu3.jpg', 'Description for Menu 3', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (4, 4, 'Menu 4', 13000, 'http://example.com/menu4.jpg', 'Description for Menu 4', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (5, 5, 'Menu 5', 15000, 'http://example.com/menu5.jpg', 'Description for Menu 5', 3, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (6, 6, 'Menu 6', 17000, 'http://example.com/menu6.jpg', 'Description for Menu 6', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (7, 7, 'Menu 7', 19000, 'http://example.com/menu7.jpg', 'Description for Menu 7', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (8, 8, 'Menu 8', 20000, 'http://example.com/menu8.jpg', 'Description for Menu 8', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (9, 9, 'Menu 9', 18000, 'http://example.com/menu9.jpg', 'Description for Menu 9', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (10, 10, 'Menu 10', 16000, 'http://example.com/menu10.jpg', 'Description for Menu 10', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (11, 11, 'Menu 11', 14000, 'http://example.com/menu11.jpg', 'Description for Menu 11', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (12, 12, 'Menu 12', 12000, 'http://example.com/menu12.jpg', 'Description for Menu 12', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (13, 13, 'Menu 13', 11000, 'http://example.com/menu13.jpg', 'Description for Menu 13', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (14, 14, 'Menu 14', 13000, 'http://example.com/menu14.jpg', 'Description for Menu 14', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (15, 15, 'Menu 15', 15000, 'http://example.com/menu15.jpg', 'Description for Menu 15', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (16, 16, 'Menu 16', 17000, 'http://example.com/menu16.jpg', 'Description for Menu 16', 3, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (17, 17, 'Menu 17', 19000, 'http://example.com/menu17.jpg', 'Description for Menu 17', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (18, 18, 'Menu 18', 20000, 'http://example.com/menu18.jpg', 'Description for Menu 18', 3, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (19, 19, 'Menu 19', 18000, 'http://example.com/menu19.jpg', 'Description for Menu 19', 3, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
-    (20, 20, 'Menu 20', 16000, 'http://example.com/menu20.jpg', 'Description for Menu 20', 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
+    (1, 1, 'Represent 1', 'Menu 1', 10000, 'http://example.com/menu1.jpg', 'Description for Menu 1', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (2, 2, 'Represent 2', 'Menu 2', 12000, 'http://example.com/menu2.jpg', 'Description for Menu 2', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (3, 3, 'Represent 3', 'Menu 3', 11000, 'http://example.com/menu3.jpg', 'Description for Menu 3', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (4, 4, 'Represent 4', 'Menu 4', 13000, 'http://example.com/menu4.jpg', 'Description for Menu 4', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (5, 5, 'Represent 5', 'Menu 5', 15000, 'http://example.com/menu5.jpg', 'Description for Menu 5', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (6, 6, 'Represent 6', 'Menu 6', 17000, 'http://example.com/menu6.jpg', 'Description for Menu 6', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (7, 7, 'Represent 7', 'Menu 7', 19000, 'http://example.com/menu7.jpg', 'Description for Menu 7', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (8, 8, 'Represent 8', 'Menu 8', 20000, 'http://example.com/menu8.jpg', 'Description for Menu 8', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (9, 9, 'Represent 9', 'Menu 9', 18000, 'http://example.com/menu9.jpg', 'Description for Menu 9', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (10, 10, 'Represent 10', 'Menu 10', 16000, 'http://example.com/menu10.jpg', 'Description for Menu 10', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (11, 11, 'Represent 11', 'Menu 11', 14000, 'http://example.com/menu11.jpg', 'Description for Menu 11', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (12, 12, 'Represent 12', 'Menu 12', 12000, 'http://example.com/menu12.jpg', 'Description for Menu 12', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (13, 13, 'Represent 13', 'Menu 13', 11000, 'http://example.com/menu13.jpg', 'Description for Menu 13', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (14, 14, 'Represent 14', 'Menu 14', 13000, 'http://example.com/menu14.jpg', 'Description for Menu 14', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (15, 15, 'Represent 15', 'Menu 15', 15000, 'http://example.com/menu15.jpg', 'Description for Menu 15', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (16, 16, 'Represent 16', 'Menu 16', 17000, 'http://example.com/menu16.jpg', 'Description for Menu 16', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (17, 17, 'Represent 17', 'Menu 17', 19000, 'http://example.com/menu17.jpg', 'Description for Menu 17', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (18, 18, 'Represent 18', 'Menu 18', 20000, 'http://example.com/menu18.jpg', 'Description for Menu 18', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (19, 19, 'Represent 19', 'Menu 19', 18000, 'http://example.com/menu19.jpg', 'Description for Menu 19', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (20, 20, 'Represent 20', 'Menu 20', 16000, 'http://example.com/menu20.jpg', 'Description for Menu 20', 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
     
+    INSERT INTO restaurant_option_group (mandatory, choice_mode, maximum, created_at, updated_at, deleted_at)
+VALUES
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (FALSE, 2, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
+
+INSERT INTO restaurant_option (option_group_id, name, price, created_at, updated_at, deleted_at)
+VALUES
+    (1, 'Option 1', 1000, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (2, 'Option 2', 1200, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (3, 'Option 3', 1100, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (4, 'Option 4', 1300, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (5, 'Option 5', 1500, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (6, 'Option 6', 1700, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (7, 'Option 7', 1900, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (8, 'Option 8', 2000, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (9, 'Option 9', 1800, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (10, 'Option 10', 1600, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (11, 'Option 11', 1400, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (12, 'Option 12', 1200, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (13, 'Option 13', 1100, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (14, 'Option 14', 1300, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (15, 'Option 15', 1500, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (16, 'Option 16', 1700, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (17, 'Option 17', 1900, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (18, 'Option 18', 2000, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (19, 'Option 19', 1800, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (20, 'Option 20', 1600, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
+
+INSERT INTO restaurant_option_group_to_menu (menu_id, option_group_id, created_at, updated_at, deleted_at)
+VALUES
+    (1, 1, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (2, 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (3, 3, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (4, 4, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (5, 5, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (6, 6, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (7, 7, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (8, 8, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (9, 9, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (10, 10, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (11, 11, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (12, 12, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (13, 13, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (14, 14, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (15, 15, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (16, 16, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (17, 17, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (18, 18, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (19, 19, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (20, 20, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
+

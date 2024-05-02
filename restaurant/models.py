@@ -1,27 +1,44 @@
 from django.db import models
 from common.models import CommonModel
 
+
 class RestaurantManager(models.Manager):
     """레스토랑 모델 관리자로, 레스토랑 생성을 처리합니다."""
 
-    def create_restaurant(self, name, representative_menu, representative_menu_picture, description, notice, delivery_fee, minimum_order_amount, opening_time, closing_time, status):
+    def create_restaurant(
+        self,
+        name,
+        representative_menu,
+        representative_menu_picture,
+        logo,
+        description,
+        notice,
+        delivery_fee,
+        minimum_order_amount,
+        opening_time,
+        closing_time,
+        status,
+    ):
         """이름, 대표 메뉴, 대표 메뉴 사진, 설명, 공지, 배달비, 최소 주문 금액, 오픈 시간, 닫는 시간, 상태를 사용하여 새로운 레스토랑을 생성하고 반환합니다."""
 
         restaurant = self.model(
             name=name,
             representative_menu=representative_menu,
             representative_menu_picture=representative_menu_picture,
+            logo=logo,
             description=description,
             notice=notice,
             delivery_fee=delivery_fee,
             minimum_order_amount=minimum_order_amount,
             opening_time=opening_time,
             closing_time=closing_time,
-            status=status
+            status=status,
         )
         restaurant.save(using=self._db)
 
         return restaurant
+
+
 class Restaurant(CommonModel):
 
     STATUS_CHOICES = (
@@ -31,6 +48,7 @@ class Restaurant(CommonModel):
     )
 
     name = models.CharField(max_length=50)
+    logo = models.URLField(null=True, default=None)
     representative_menu = models.PositiveIntegerField(null=True, default=None)
     representative_menu_picture = models.URLField(null=True, default=None)
     description = models.TextField(null=True, default=None)
@@ -110,7 +128,7 @@ class Menu(CommonModel):
 
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
     menu_group = models.ForeignKey(Menu_group, on_delete=models.CASCADE)
-
+    represent = models.CharField(max_length=20, null=True, default=None)
     name = models.CharField(max_length=50)
     price = models.IntegerField()
     picture = models.URLField(null=True, default=None)
@@ -127,7 +145,7 @@ class Option_group(CommonModel):
         (1, "Single"),
         (2, "Multiple"),
     )
-
+    option_name = models.CharField(max_length=20, default="sauce")
     mandatory = models.BooleanField(default=False)
     choice_mode = models.IntegerField(choices=STATUS_CHOICES, default=2)
     maximum = models.IntegerField()
