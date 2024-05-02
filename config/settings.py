@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "user",
     "restaurant",
     "order",
+    "okvadmin",
 ]
 
 MIDDLEWARE = [
