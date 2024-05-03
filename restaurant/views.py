@@ -155,7 +155,7 @@ class RestaurantGetDetailView(APIView):
             )
 
 
-class TestView(APIView):
+class MenuGetDetailView(APIView):
     def get(self, request):
         # 토큰 인증
         JWT_authenticator = JWTAuthentication()
