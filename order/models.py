@@ -8,8 +8,14 @@ from django.core.exceptions import ValidationError
 # Create your models here.
 class Order(CommonModel):
 
+    STATUS_CHOICES = (
+        (0, "Order received"),
+        (1, "Cooking"),
+        (2, "Cooking complete"),
+    )
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    order_status = models.IntegerField()
+    order_status = models.IntegerField(choices=STATUS_CHOICES)
     cooking_time = models.DateTimeField(auto_now_add=True, null=True)
     delivery_address = models.CharField(max_length=255)
     dispatch_status = models.IntegerField(null=True, default=None)
@@ -29,7 +35,7 @@ class Order(CommonModel):
         user,
         delivery_address,
         total_price,
-        order_status=1,
+        order_status=0,
         dispatch_status=None,
         store_request=None,
         rider_request=None,
@@ -37,7 +43,7 @@ class Order(CommonModel):
     ):
         """
         사용자, 배송 주소, 총 가격을 기반으로 주문을 생성
-        기본적으로 order_status는 1(주문 접수됨)로 설정
+        기본적으로 order_status는 0(주문 접수됨)로 설정
         """
         order = cls(
             user=user,
@@ -130,7 +136,7 @@ class Delivery(CommonModel):
 
     delivery_man = models.ForeignKey(Delivery_man, on_delete=models.CASCADE)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    estunated_time = models.DateTimeField()
+    estimated_time = models.DateTimeField()
     completion_time = models.DateTimeField()
 
     def __str__(self):
