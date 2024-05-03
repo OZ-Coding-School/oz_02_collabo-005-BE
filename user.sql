@@ -276,3 +276,142 @@ VALUES
     (19, 19, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
     (20, 20, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL);
 
+INSERT INTO order_order (user_id, order_status, cooking_time, delivery_address, dispatch_status, store_request, rider_request, total_price, order_time, cancle_reason, created_at, updated_at, deleted_at)
+VALUES
+    (1, 0, '2024-04-01 12:00:00', '123 Main Street', NULL, NULL, NULL, 15000, '2024-04-01 12:00:00', NULL, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (2, 1, '2024-04-02 13:00:00', '456 Elm Street', 1, 'Extra napkins please', NULL, 20000, '2024-04-02 13:00:00', NULL, '2024-04-02 12:00:00', '2024-04-02 12:00:00', NULL),
+    (3, 2, '2024-04-03 14:00:00', '789 Oak Street', 2, 'No onions', 'Faster delivery if possible', 25000, '2024-04-03 14:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (4, 0, '2024-04-04 15:00:00', '101 Maple Street', NULL, NULL, NULL, 18000, '2024-04-04 15:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (5, 1, '2024-04-05 16:00:00', '202 Pine Street', 1, 'Extra sauce on the side', NULL, 22000, '2024-04-05 16:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (6, 2, '2024-04-06 17:00:00', '303 Cedar Street', 2, 'Extra cheese', 'Please call upon arrival', 19000, '2024-04-06 17:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (7, 0, '2024-04-07 18:00:00', '404 Birch Street', NULL, NULL, NULL, 21000, '2024-04-07 18:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (8, 1, '2024-04-08 19:00:00', '505 Walnut Street', 1, 'Extra ketchup', NULL, 23000, '2024-04-08 19:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (9, 2, '2024-04-09 20:00:00', '606 Pineapple Street', 2, 'No pickles', 'Please ring doorbell', 20000, '2024-04-09 20:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (10, 0, '2024-04-10 21:00:00', '707 Strawberry Street', NULL, NULL, NULL, 24000, '2024-04-10 21:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (11, 1, '2024-04-11 22:00:00', '808 Orange Street', 1, 'Extra mustard', NULL, 26000, '2024-04-11 22:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (12, 2, '2024-04-12 23:00:00', '909 Banana Street', 2, 'No mayo', 'Leave at doorstep', 27000, '2024-04-12 23:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (13, 0, '2024-04-13 12:00:00', '1010 Mango Street', NULL, NULL, NULL, 29000, '2024-04-13 12:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (14, 1, '2024-04-14 13:00:00', '1111 Grape Street', 1, 'Extra lettuce', NULL, 31000, '2024-04-14 13:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (15, 2, '2024-04-15 14:00:00', '1212 Watermelon Street', 2, 'No tomato', 'Deliver to back entrance', 33000, '2024-04-15 14:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (16, 0, '2024-04-16 15:00:00', '1313 Blueberry Street', NULL, NULL, NULL, 35000, '2024-04-16 15:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (17, 1, '2024-04-17 16:00:00', '1414 Raspberry Street', 1, 'Extra olives', NULL, 37000, '2024-04-17 16:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (18, 2, '2024-04-18 17:00:00', '1515 Cranberry Street', 2, 'No jalapenos', 'Leave with neighbor', 39000, '2024-04-18 17:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (19, 0, '2024-04-19 18:00:00', '1616 Cherry Street', NULL, NULL, NULL, 41000, '2024-04-19 18:00:00', NULL,'2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (20, 1, '2024-04-20 19:00:00', '1717 Apple Street', 1, 'Extra peppers', NULL, 43000, '2024-04-20 19:00:00', NULL, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL);
+
+INSERT INTO order_order_detail (order_id, menu_id, quantity, created_at, updated_at, deleted_at)
+VALUES 
+    (1, 1, 2, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (2, 2, 1, '2024-04-02 12:00:00', '2024-04-02 12:00:00', NULL),
+    (3, 3, 3, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (4, 4, 2, '2024-04-04 12:00:00', '2024-04-04 12:00:00', NULL),
+    (5, 5, 1, '2024-04-05 12:00:00', '2024-04-05 12:00:00', NULL),
+    (6, 6, 3, '2024-04-06 12:00:00', '2024-04-06 12:00:00', NULL),
+    (7, 7, 2, '2024-04-07 12:00:00', '2024-04-07 12:00:00', NULL),
+    (8, 8, 1, '2024-04-08 12:00:00', '2024-04-08 12:00:00', NULL),
+    (9, 9, 3, '2024-04-09 12:00:00', '2024-04-09 12:00:00', NULL),
+    (10, 10, 2, '2024-04-10 12:00:00', '2024-04-10 12:00:00', NULL),
+    (11, 11, 1, '2024-04-11 12:00:00', '2024-04-11 12:00:00', NULL),
+    (12, 12, 3, '2024-04-12 12:00:00', '2024-04-12 12:00:00', NULL),
+    (13, 13, 2, '2024-04-13 12:00:00', '2024-04-13 12:00:00', NULL),
+    (14, 14, 1, '2024-04-14 12:00:00', '2024-04-14 12:00:00', NULL),
+    (15, 15, 3, '2024-04-15 12:00:00', '2024-04-15 12:00:00', NULL),
+    (16, 16, 2, '2024-04-16 12:00:00', '2024-04-16 12:00:00', NULL),
+    (17, 17, 1, '2024-04-17 12:00:00', '2024-04-17 12:00:00', NULL),
+    (18, 18, 3, '2024-04-18 12:00:00', '2024-04-18 12:00:00', NULL),
+    (19, 19, 2, '2024-04-19 12:00:00', '2024-04-19 12:00:00', NULL),
+    (20, 20, 1, '2024-04-20 12:00:00', '2024-04-20 12:00:00', NULL);
+
+INSERT INTO order_order_option_group (order_detail_id, order_group_name, mandatory, created_at, updated_at, deleted_at)
+VALUES 
+    (1, 'Option Group 1', FALSE, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (2, 'Option Group 2', FALSE, '2024-04-02 12:00:00', '2024-04-02 12:00:00', NULL),
+    (3, 'Option Group 3', TRUE, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (4, 'Option Group 4', FALSE, '2024-04-04 12:00:00', '2024-04-04 12:00:00', NULL),
+    (5, 'Option Group 5', TRUE, '2024-04-05 12:00:00', '2024-04-05 12:00:00', NULL),
+    (6, 'Option Group 6', FALSE, '2024-04-06 12:00:00', '2024-04-06 12:00:00', NULL),
+    (7, 'Option Group 7', FALSE, '2024-04-07 12:00:00', '2024-04-07 12:00:00', NULL),
+    (8, 'Option Group 8', TRUE, '2024-04-08 12:00:00', '2024-04-08 12:00:00', NULL),
+    (9, 'Option Group 9', FALSE, '2024-04-09 12:00:00', '2024-04-09 12:00:00', NULL),
+    (10, 'Option Group 10', TRUE, '2024-04-10 12:00:00', '2024-04-10 12:00:00', NULL),
+    (11, 'Option Group 11', FALSE, '2024-04-11 12:00:00', '2024-04-11 12:00:00', NULL),
+    (12, 'Option Group 12', FALSE, '2024-04-12 12:00:00', '2024-04-12 12:00:00', NULL),
+    (13, 'Option Group 13', TRUE, '2024-04-13 12:00:00', '2024-04-13 12:00:00', NULL),
+    (14, 'Option Group 14', FALSE, '2024-04-14 12:00:00', '2024-04-14 12:00:00', NULL),
+    (15, 'Option Group 15', FALSE, '2024-04-15 12:00:00', '2024-04-15 12:00:00', NULL),
+    (16, 'Option Group 16', TRUE, '2024-04-16 12:00:00', '2024-04-16 12:00:00', NULL),
+    (17, 'Option Group 17', FALSE, '2024-04-17 12:00:00', '2024-04-17 12:00:00', NULL),
+    (18, 'Option Group 18', FALSE, '2024-04-18 12:00:00', '2024-04-18 12:00:00', NULL),
+    (19, 'Option Group 19', TRUE, '2024-04-19 12:00:00', '2024-04-19 12:00:00', NULL),
+    (20, 'Option Group 20', FALSE, '2024-04-20 12:00:00', '2024-04-20 12:00:00', NULL);
+
+
+INSERT INTO order_order_option (order_option_group_id, option_name, option_price, created_at, updated_at, deleted_at)
+VALUES 
+    (1, 'Extra Cheese', 1000, '2024-04-01 12:00:00', '2024-04-01 12:00:00', NULL),
+    (2, 'Extra Sauce', 500, '2024-04-02 12:00:00', '2024-04-02 12:00:00', NULL),
+    (3, 'Extra Toppings', 700, '2024-04-03 12:00:00', '2024-04-03 12:00:00', NULL),
+    (4, 'Seasonal Vegetables', 300, '2024-04-04 12:00:00', '2024-04-04 12:00:00', NULL),
+    (5, 'Spicy Mayo', 1200, '2024-04-05 12:00:00', '2024-04-05 12:00:00', NULL),
+    (6, 'Extra Bacon', 800, '2024-04-06 12:00:00', '2024-04-06 12:00:00', NULL),
+    (7, 'Avocado', 1300, '2024-04-07 12:00:00', '2024-04-07 12:00:00', NULL),
+    (8, 'Garlic Aioli', 1000, '2024-04-08 12:00:00', '2024-04-08 12:00:00', NULL),
+    (9, 'Grilled Onions', 1500, '2024-04-09 12:00:00', '2024-04-09 12:00:00', NULL),
+    (10, 'Mushroom Sauce', 1100, '2024-04-10 12:00:00', '2024-04-10 12:00:00', NULL),
+    (11, 'Crispy Onions', 1300, '2024-04-11 12:00:00', '2024-04-11 12:00:00', NULL),
+    (12, 'Fried Egg', 1400, '2024-04-12 12:00:00', '2024-04-12 12:00:00', NULL),
+    (13, 'Guacamole', 600, '2024-04-13 12:00:00', '2024-04-13 12:00:00', NULL),
+    (14, 'Pesto Sauce', 900, '2024-04-14 12:00:00', '2024-04-14 12:00:00', NULL),
+    (15, 'Extra Jalapenos', 200, '2024-04-15 12:00:00', '2024-04-15 12:00:00', NULL),
+    (16, 'Barbecue Sauce', 1400, '2024-04-16 12:00:00', '2024-04-16 12:00:00', NULL),
+    (17, 'Cilantro Lime Dressing', 800, '2024-04-17 12:00:00', '2024-04-17 12:00:00', NULL),
+    (18, 'Chili Flakes', 500, '2024-04-18 12:00:00', '2024-04-18 12:00:00', NULL),
+    (19, 'Honey Mustard', 1100, '2024-04-19 12:00:00', '2024-04-19 12:00:00', NULL),
+    (20, 'Sriracha Sauce', 100, '2024-04-20 12:00:00', '2024-04-20 12:00:00', NULL);
+
+INSERT INTO order_delivery_man (delivery_man_name, delivery_type, created_at, updated_at, deleted_at)
+VALUES 
+    ('John', 1, NOW(), NOW(), NULL),
+    ('Alice', 2, NOW(), NOW(), NULL),
+    ('Michael', 1, NOW(), NOW(), NULL),
+    ('Emily', 2, NOW(), NOW(), NULL),
+    ('William', 1, NOW(), NOW(), NULL),
+    ('Sophia', 2, NOW(), NOW(), NULL),
+    ('James', 1, NOW(), NOW(), NULL),
+    ('Olivia', 2, NOW(), NOW(), NULL),
+    ('Benjamin', 1, NOW(), NOW(), NULL),
+    ('Emma', 2, NOW(), NOW(), NULL),
+    ('Daniel', 1, NOW(), NOW(), NULL),
+    ('Ava', 2, NOW(), NOW(), NULL),
+    ('Matthew', 1, NOW(), NOW(), NULL),
+    ('Isabella', 2, NOW(), NOW(), NULL),
+    ('Jackson', 1, NOW(), NOW(), NULL),
+    ('Mia', 2, NOW(), NOW(), NULL),
+    ('David', 1, NOW(), NOW(), NULL),
+    ('Charlotte', 2, NOW(), NOW(), NULL),
+    ('Joseph', 1, NOW(), NOW(), NULL),
+    ('Amelia', 2, NOW(), NOW(), NULL);
+
+
+INSERT INTO delivery_delivery (delivery_man_id, order_id, estimated_time, completion_time, created_at, updated_at, deleted_at)
+VALUES 
+    (1, 1, NOW(), NOW(), NOW(), NOW(), NULL),
+    (2, 2, NOW(), NOW(), NOW(), NOW(), NULL),
+    (3, 3, NOW(), NOW(), NOW(), NOW(), NULL),
+    (4, 4, NOW(), NOW(), NOW(), NOW(), NULL),
+    (5, 5, NOW(), NOW(), NOW(), NOW(), NULL),
+    (6, 6, NOW(), NOW(), NOW(), NOW(), NULL),
+    (7, 7, NOW(), NOW(), NOW(), NOW(), NULL),
+    (8, 8, NOW(), NOW(), NOW(), NOW(), NULL),
+    (9, 9, NOW(), NOW(), NOW(), NOW(), NULL),
+    (10, 10, NOW(), NOW(), NOW(), NOW(), NULL),
+    (11, 11, NOW(), NOW(), NOW(), NOW(), NULL),
+    (12, 12, NOW(), NOW(), NOW(), NOW(), NULL),
+    (13, 13, NOW(), NOW(), NOW(), NOW(), NULL),
+    (14, 14, NOW(), NOW(), NOW(), NOW(), NULL),
+    (15, 15, NOW(), NOW(), NOW(), NOW(), NULL),
+    (16, 16, NOW(), NOW(), NOW(), NOW(), NULL),
+    (17, 17, NOW(), NOW(), NOW(), NOW(), NULL),
+    (18, 18, NOW(), NOW(), NOW(), NOW(), NULL),
+    (19, 19, NOW(), NOW(), NOW(), NOW(), NULL),
+    (20, 20, NOW(), NOW(), NOW(), NOW(), NULL);
