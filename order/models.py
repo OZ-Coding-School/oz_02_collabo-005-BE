@@ -64,10 +64,9 @@ class Order(CommonModel):
 
 class Order_detail(CommonModel):
 
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_name")
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
-
     def __str__(self):
         return f"Order Detail - Order #{self.order_id}, Menu: {self.menu.name}, Quantity: {self.quantity}"
 

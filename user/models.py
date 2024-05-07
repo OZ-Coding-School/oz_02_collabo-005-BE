@@ -55,7 +55,7 @@ class User(CommonModel, PermissionsMixin, AbstractBaseUser):
     phone_number = models.CharField(max_length=50)
     is_staff = models.BooleanField(default=False)
     birthday = models.CharField(max_length=15, default=None, null=True)
-    # is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True, default=None)
 
     objects = UserManager()
 
