@@ -39,6 +39,9 @@ class RestaurantManager(models.Manager):
         return restaurant
 
 
+from django.utils import timezone
+
+
 class Restaurant(CommonModel):
 
     STATUS_CHOICES = (
@@ -57,7 +60,16 @@ class Restaurant(CommonModel):
     minimum_order_amount = models.PositiveIntegerField()
     opening_time = models.TimeField()
     closing_time = models.TimeField()
-    status = models.PositiveIntegerField(choices=STATUS_CHOICES)
+
+    @property
+    def status(self):
+        now = timezone.now().time()
+        if self.opening_time <= now < self.closing_time:
+            return 1  # Open
+        elif now < self.opening_time or now >= self.closing_time:
+            return 2  # Closed
+        else:
+            return 3  # Under Maintenance
 
     def __str__(self):
         return f"({self.id}){self.name}"
@@ -130,7 +142,7 @@ class Menu(CommonModel):
     menu_group = models.ForeignKey(Menu_group, on_delete=models.CASCADE)
     represent = models.CharField(max_length=20, null=True, default=None)
     name = models.CharField(max_length=50)
-    price = models.IntegerField()
+    price = models.PositiveIntegerField(null=True, default=None)
     picture = models.URLField(null=True, default=None)
     description = models.CharField(max_length=255, null=True, default=None)
     status = models.PositiveIntegerField(choices=STATUS_CHOICES)
@@ -147,8 +159,8 @@ class Option_group(CommonModel):
     )
     name = models.CharField(max_length=30)
     mandatory = models.BooleanField(default=False)
-    choice_mode = models.IntegerField(choices=STATUS_CHOICES, default=2)
-    maximum = models.IntegerField()
+    choice_mode = models.PositiveIntegerField(choices=STATUS_CHOICES, default=2)
+    maximum = models.PositiveIntegerField(default=1)
 
 
 class Option_group_to_menu(CommonModel):
@@ -162,7 +174,7 @@ class Option_group_to_menu(CommonModel):
 class Option(CommonModel):
     option_group = models.ForeignKey(Option_group, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
-    price = models.IntegerField()
+    price = models.PositiveIntegerField(null=True, default=None)
 
     def __str__(self):
         return self.name
