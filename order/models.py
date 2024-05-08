@@ -15,15 +15,15 @@ class Order(CommonModel):
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    order_status = models.IntegerField(choices=STATUS_CHOICES)
+    order_status = models.PositiveIntegerField(choices=STATUS_CHOICES)
     cooking_time = models.DateTimeField(auto_now_add=True, null=True)
     delivery_address = models.CharField(max_length=255)
     dispatch_status = models.IntegerField(null=True, default=None)
     store_request = models.TextField(null=True, default=None)
     rider_request = models.TextField(null=True, default=None)
-    total_price = models.PositiveIntegerField()
+    total_price = models.PositiveIntegerField(null=True, default=None)
     order_time = models.DateTimeField(auto_now_add=True)
-    cancle_reason = models.CharField(max_length=255, null=True, default=None)
+    cancle_reason = models.TextField(null=True, default=None)
 
     def clean(self):
         # total_price 필드에 대한 음수 값 확인
@@ -76,10 +76,13 @@ class Order_detail(CommonModel):
 
 class Order_option(CommonModel):
 
-    Order_detail = models.ForeignKey(Order_detail, on_delete=models.CASCADE)
+
+    order_detail = models.ForeignKey(Order_detail, on_delete=models.CASCADE)
     option_name = models.CharField(max_length=255)
-    option_price = models.PositiveIntegerField()
-    name = models.CharField(max_length=30)
+    option_price = models.PositiveIntegerField(null=True, default=None)
+    option_group_name = models.CharField(max_length=30)
+
+
     def __str__(self):
         return f"Order Option - Group: {self.Order_detail.order_group_name}, Name: {self.option_name}, Price: {self.option_price}"
 
@@ -89,10 +92,10 @@ class Payment(CommonModel):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     payment_method = models.CharField(max_length=255)
     payment_time = models.DateTimeField(auto_now_add=True)
-    total_price = models.PositiveIntegerField()
-    coupon = models.PositiveIntegerField()
-    delivery_pay = models.PositiveIntegerField()
-    final_price = models.PositiveIntegerField()
+    total_price = models.PositiveIntegerField(null=True, default=None)
+    coupon = models.PositiveIntegerField(null=True, default=None)
+    delivery_pay = models.PositiveIntegerField(null=True, default=None)
+    final_price = models.PositiveIntegerField(null=True, default=None)
 
     def clean(self):
         # total_price 필드에 대한 음수 값 확인
