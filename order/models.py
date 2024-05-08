@@ -76,10 +76,12 @@ class Order_detail(CommonModel):
 
 class Order_option(CommonModel):
 
+
     order_detail = models.ForeignKey(Order_detail, on_delete=models.CASCADE)
     option_name = models.CharField(max_length=255)
     option_price = models.PositiveIntegerField(null=True, default=None)
     option_group_name = models.CharField(max_length=30)
+
 
     def __str__(self):
         return f"Order Option - Group: {self.Order_detail.order_group_name}, Name: {self.option_name}, Price: {self.option_price}"
