@@ -187,14 +187,14 @@ class MenuGetDetailView(APIView):
                     # Menu_group에서 description의 값들을 가져온다.
                     option_group_value = (
                         Option_group.objects.filter(id=option_group_id)
-                        .values("option_name")
+                        .values("name")
                         .first()
                     )
 
                     # description이라는 컬럼이 있는 데이터들의 값만 가져온다
                     if option_group_value:
                         # 컬럼 형식에서 description의 내용만 가져온다.
-                        option_group_description = option_group_value["option_name"]
+                        option_group_description = option_group_value["name"]
                         
                         # Menu_group과 같은 방식으로 Menu의 컬럼들의 데이터를 가져온다.
                         # Menu_group_id와 같은 Menu_id를 가지고 있는 데이터들을 queryset으로 나눈다.
