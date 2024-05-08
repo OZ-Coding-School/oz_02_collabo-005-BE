@@ -64,31 +64,24 @@ class Order(CommonModel):
 
 class Order_detail(CommonModel):
 
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_name")
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name="order_name"
+    )
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
+
     def __str__(self):
         return f"Order Detail - Order #{self.order_id}, Menu: {self.menu.name}, Quantity: {self.quantity}"
 
 
-class Order_option_group(CommonModel):
-
-    order_detail = models.ForeignKey(Order_detail, on_delete=models.CASCADE)
-    order_group_name = models.CharField(max_length=255)
-    mandatory = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Order Option Group - Order Detail #{self.order_detail_id}, Name: {self.order_group_name}"
-
-
 class Order_option(CommonModel):
 
-    order_option_group = models.ForeignKey(Order_option_group, on_delete=models.CASCADE)
+    Order_detail = models.ForeignKey(Order_detail, on_delete=models.CASCADE)
     option_name = models.CharField(max_length=255)
     option_price = models.PositiveIntegerField()
-
+    name = models.CharField(max_length=30)
     def __str__(self):
-        return f"Order Option - Group: {self.order_option_group.order_group_name}, Name: {self.option_name}, Price: {self.option_price}"
+        return f"Order Option - Group: {self.Order_detail.order_group_name}, Name: {self.option_name}, Price: {self.option_price}"
 
 
 class Payment(CommonModel):

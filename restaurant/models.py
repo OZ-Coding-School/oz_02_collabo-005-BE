@@ -145,7 +145,7 @@ class Option_group(CommonModel):
         (1, "Single"),
         (2, "Multiple"),
     )
-    option_name = models.CharField(max_length=20, default="sauce")
+    name = models.CharField(max_length=30)
     mandatory = models.BooleanField(default=False)
     choice_mode = models.IntegerField(choices=STATUS_CHOICES, default=2)
     maximum = models.IntegerField()
