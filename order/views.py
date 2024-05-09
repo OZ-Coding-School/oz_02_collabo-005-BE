@@ -11,7 +11,7 @@ from .models import Order
 from .serializers import *
 
 
-class TestView(APIView):
+class OrderCreateView(APIView):
     def post(self, request):
         JWT_authenticator = JWTAuthentication()
         is_validated_token = JWT_authenticator.authenticate(request)
@@ -22,8 +22,6 @@ class TestView(APIView):
             serializer = OrderSerializer(data=request.data)
             if serializer.is_valid():
                 a = serializer.create(request.data)
-
-                
                 res = {"order": a.id, "message": "Success Created Order"}
                 stat = status.HTTP_201_CREATED
             else:
@@ -36,76 +34,54 @@ class TestView(APIView):
         return Response(res, stat)
 
 
-# from rest_framework import mixins
-# from rest_framework.viewsets import GenericViewSet
+class OrderGetListView(APIView):
+    def get(self, request):
+        JWT_authenticator = JWTAuthentication()
+        is_validated_token = JWT_authenticator.authenticate(request)
 
-# from rest_framework_simplejwt.authentication import JWTAuthentication
+        if is_validated_token:
+            user = is_validated_token[0]
+            orders = Order.objects.filter(user=user.id)
+            response_data = []
+            for order in orders:
+                detail_menu_list = []
+                order_detail_ids = Order_detail.objects.filter(order=order.id)
 
-# from rest_framework.permissions import IsAuthenticated
-# from .models import Order
-# from .serializers import *
+                for order_detail in order_detail_ids:
+                    menu_id = order_detail.menu_id
+                    menu = Menu.objects.get(id=menu_id)
+                    restaurant = menu.restaurant
+                    total_price = menu.price * order_detail.quantity
+                    options_list = []
 
+                    order_options = Order_option.objects.filter(order_detail=order_detail)
+                    for order_option in order_options:
+                        options_res = {"option_name": order_option.option_name}
+                        options_list.append(options_res)
+                        total_price += order_option.option_price
 
-# class OrderViewSet(
-#     mixins.CreateModelMixin,
-#     mixins.ListModelMixin,
-#     mixins.RetrieveModelMixin,
-#     GenericViewSet,
-# ):
-#     queryset = Order.objects.all()
-#     serializer_class = OrderSerializer
-#     authentication_classes = [JWTAuthentication]  # simple-jwt JWTAuthentication 사용
-#     permission_classes = [IsAuthenticated]
-#     def create(self, request, *args, **kwargs):
-#         """
-#         주문 생성
+                    menu_res = {
+                        "name": menu.name,
+                        "quantity": order_detail.quantity,
+                        "option": options_list,
+                        "total_price": total_price,
+                    }
 
+                    restaurant_res = {
+                        "restaurant_id": restaurant.id,
+                        "restaurant_name": restaurant.name,
+                        "picture": restaurant.representative_menu_picture,
+                        "menu_name": menu_res,
+                    }
 
-#         [req - model 데이터 일치 검증]
-#         order_menu -> 이름, 가격
-#         order_option_group -> 이름, mandatory, mandatory:true-> len(option_group) = 1,
-#         order_option -> 이름, 가격
+                    detail_menu_list.append(restaurant_res)
 
-#         토큰 필요
-#         """
-#         return super().create(request, *args, **kwargs)
-
-#     def list(self, request, *args, **kwargs):
-#         """
-#         주문 조회
-
-
-#         유저가 주문한 주문 조회
-#         토큰 필요
-#         """
-#         return super().list(request, *args, **kwargs)
-
-#     def retrieve(self, request, *args, **kwargs):
-#         """
-#         주문 디테일 조회
-
-
-#         유저가 주문한 주문의 디테일 조회
-#         토큰 필요
-#         """
-#         return super().retrieve(request, *args, **kwargs)
-
-#     def get_serializer_class(self):
-#         if self.action == "create":
-#             return OrderCreateSerializer
-#         if self.action == "retrieve":
-#             return OrderSerializer
-#         if self.action == "list":
-#             return OrderListSerializer
-#         return super().get_serializer_class()
-
-#     def get_queryset(self):
-#         qs = super().get_queryset()
-#         return (
-#             qs.filter(user=self.request.user)
-#         )
-
-#     def perform_create(self, serializer):
-#         serializer.save(owner=self.request.user)
-
+                res = {
+                    "id": order.id,
+                    "order_time": order.order_time,
+                    "user_id": order.user_id,
+                    "menus": detail_menu_list,
+                }
+                response_data.append(res)
+            return Response(response_data)
 
