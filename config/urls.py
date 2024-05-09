@@ -17,6 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -25,4 +26,8 @@ urlpatterns = [
     path("api/v1/order/", include("order.urls")),
     # admin 페이지 API
     path("api/v1/admin/", include("okvadmin.urls")),
+
+    # token 갱신
+    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
 ]
