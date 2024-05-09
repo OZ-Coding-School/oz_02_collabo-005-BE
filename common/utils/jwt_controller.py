@@ -23,5 +23,5 @@ class TokenCreator:
         return CustomTokenObtainPairSerializer.get_token(user_id, claims)
     
     @classmethod
-    def create_token_by_token(cls, old_refresh_token):
+    def create_refresh_token_by_token(cls, old_refresh_token):
         return RefreshToken(old_refresh_token)
