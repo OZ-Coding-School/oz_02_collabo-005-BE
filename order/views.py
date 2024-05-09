@@ -79,7 +79,7 @@ class OrderGetListView(APIView):
                 res = {
                     "id": order.id,
                     "order_time": order.order_time,
-                    "user_id": order.user_id,
+                    "order_status": order.order_status,
                     "menus": detail_menu_list,
                 }
                 response_data.append(res)
