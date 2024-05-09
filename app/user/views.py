@@ -47,7 +47,7 @@ class UserView(APIView):
             res = Response(
                 {
                     "name": user.name,
-                    "eamil": user.email,
+                    "email": user.email,
                     "phone_number": user.phone_number,
                     "birthday": user.birthday,
                 },
@@ -158,7 +158,7 @@ class UpdateView(UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        return Response(serializer.data)
+        return Response({"Update Complate", status.HTTP_200_OK})
 
 
 class DeleteView(APIView):
