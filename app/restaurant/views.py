@@ -29,48 +29,48 @@ class RestaurantGetListView(APIView):
                 "description",
                 "delivery_fee",
                 "representative_menu_picture",
+                "notice"
             )
 
             # for restaurant in restaurants에서 빠져나온 값 들을 하나씩 List 형태로 저장한다.
             response_data = []
 
             for restaurant in restaurants:
-                # hashtag, category는 한 번 돌면 새로운 List를 만든다.
+                # 해시태그와 카테고리는 한 번 돌 때마다 새로운 리스트를 만듭니다.
                 hashtag_list = []
                 category_list = []
 
-                # 각자의 Class에서 restaurant의 id 값을 가져오고,
-                # restaurants에서 가져온 id 값과 같은 데이터에 id 값들을 저장 (hashtag_ids, category_ids)
+                # 각각의 클래스에서 레스토랑의 id 값을 가져와서,
+                # restaurants에서 가져온 id 값과 같은 데이터의 id 값을 저장합니다. (hashtag_ids, category_ids)
                 hashtag_ids = RestaurantHashtag.objects.filter(
                     restaurant=restaurant["id"]
-                ).values("hashtag_id")
+                ).values_list("hashtag_id", flat=True)
                 category_ids = RestaurantCategory.objects.filter(
                     restaurant=restaurant["id"]
-                ).values("category_id")
+                ).values_list("category_id", flat=True)
 
-                # id 값을 가지고 hashtag와 category의 value를 가져옴
-                # for문을 통해서 각 컬럼 개수만큼 반복
-                for hashtag in hashtag_ids:
-                    id = hashtag["hashtag_id"]
-                    hashtag_value = Hashtag.objects.filter(id=id).values("hashtag")
-                    hashtag_list.append(hashtag_value)
+                # id 값을 사용하여 해시태그와 카테고리의 값을 가져옵니다.
+                # values_list('hashtag', flat=True)를 사용하여 바로 리스트로 값들을 가져옵니다.
+                for id in hashtag_ids:
+                    hashtag_value = Hashtag.objects.filter(id=id).values_list("hashtag", flat=True)
+                    hashtag_list.extend(hashtag_value)  # extend를 사용하여 리스트 합치기
 
-                for category in category_ids:
-                    id = category["category_id"]
-                    category_value = Category.objects.filter(id=id).values("category")
-                    category_list.append(category_value)
+                for id in category_ids:
+                    category_value = Category.objects.filter(id=id).values_list("category", flat=True)
+                    category_list.extend(category_value)
 
-                # 각 테이블에서 가져온 컬럼 값들을 res에 저장하고 Response
-                # hashtag나 category 값이 없으면 빈 리스트로 표시
+                # 각 테이블에서 가져온 컬럼 값들을 res에 저장하고 응답합니다.
                 res = {
                     "id": restaurant["id"],
                     "name": restaurant["name"],
                     "image": restaurant["representative_menu_picture"],
                     "hashtag": hashtag_list,
                     "category": category_list,
+                    "notice": restaurant["notice"]
                 }
                 response_data.append(res)
-                stat = status.HTTP_200_OK
+
+            stat = status.HTTP_200_OK
             return Response(response_data, stat)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -138,6 +138,7 @@ class RestaurantGetDetailView(APIView):
                         res = {
                             "id": restaurant.id,
                             "name": restaurant.name,
+                            "notice": restaurant.notice,
                             "image": restaurant.representative_menu_picture,
                             "description": restaurant.description,
                             "delivery_fee": restaurant.delivery_fee,
