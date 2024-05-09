@@ -234,3 +234,22 @@ class MenuGetDetailView(APIView):
             return Response(
                 {"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
             )
+
+
+
+
+class MenuStatusView(APIView):
+    def post(self, request):
+
+        JWT_authenticator = JWTAuthentication()
+        is_validated_token = JWT_authenticator.authenticate(request)
+        
+        if is_validated_token:
+            menu_ids = request.data.get("menu_id", [])  # 클라이언트가 보낸 메뉴 ID
+
+            response_data = {}
+            for menu_id in menu_ids:
+                menu = Menu.objects.get(id=menu_id)
+                response_data[menu.id] = menu.status
+                
+            return Response(response_data)
