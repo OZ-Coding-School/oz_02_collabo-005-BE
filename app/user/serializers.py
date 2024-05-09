@@ -21,6 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
             "current_password",
             "new_password",
         ]
+        
         extra_kwargs = {
             "password": {"write_only": True},  # 패스워드 필드는 읽기 전용으로 설정
             "birthday": {"required": False},
@@ -49,6 +50,7 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"passwords": "현재 비밀번호와 새 비밀번호 모두를 제공해야 합니다."}
             )
+
 
         return super().update(instance, validated_data)
 
