@@ -29,7 +29,7 @@ class RestaurantGetListView(APIView):
                 "description",
                 "delivery_fee",
                 "representative_menu_picture",
-                "notice"
+                "notice",
             )
 
             # for restaurant in restaurants에서 빠져나온 값 들을 하나씩 List 형태로 저장한다.
@@ -52,11 +52,17 @@ class RestaurantGetListView(APIView):
                 # id 값을 사용하여 해시태그와 카테고리의 값을 가져옵니다.
                 # values_list('hashtag', flat=True)를 사용하여 바로 리스트로 값들을 가져옵니다.
                 for id in hashtag_ids:
-                    hashtag_value = Hashtag.objects.filter(id=id).values_list("hashtag", flat=True)
-                    hashtag_list.extend(hashtag_value)  # extend를 사용하여 리스트 합치기
+                    hashtag_value = Hashtag.objects.filter(id=id).values_list(
+                        "hashtag", flat=True
+                    )
+                    hashtag_list.extend(
+                        hashtag_value
+                    )  # extend를 사용하여 리스트 합치기
 
                 for id in category_ids:
-                    category_value = Category.objects.filter(id=id).values_list("category", flat=True)
+                    category_value = Category.objects.filter(id=id).values_list(
+                        "category", flat=True
+                    )
                     category_list.extend(category_value)
 
                 # 각 테이블에서 가져온 컬럼 값들을 res에 저장하고 응답합니다.
@@ -66,7 +72,7 @@ class RestaurantGetListView(APIView):
                     "image": restaurant["representative_menu_picture"],
                     "hashtag": hashtag_list,
                     "category": category_list,
-                    "notice": restaurant["notice"]
+                    "notice": restaurant["notice"],
                 }
                 response_data.append(res)
 
@@ -105,25 +111,37 @@ class RestaurantGetDetailView(APIView):
                 for menu_group in menu_group_ids:
                     menu_list = []
                     menu_group_id = menu_group["id"]
-                    
-                    
+
+
                     # Menu_group에서 정보 가져오기
-                    menu_group_value = Menu_group.objects.filter(id=menu_group_id).values("name").first()
+                    menu_group_value = (
+                        Menu_group.objects.filter(id=menu_group_id)
+                        .values("name")
+                        .first()
+                    )
                     if menu_group_value:
-                        menu_group_description = menu_group_value["name"]
-                        
+                        menu_group_name = menu_group_value["name"]
+
                         # 메뉴 정보 가져오기
-                        menus = Menu.objects.filter(menu_group=menu_group_id).values("id", "picture", "name", "price", "description", "represent", "status")
-                        
+                        menus = Menu.objects.filter(menu_group=menu_group_id).values(
+                            "id",
+                            "picture",
+                            "name",
+                            "price",
+                            "description",
+                            "represent",
+                            "status",
+                        )
+
                         for menu in menus:
                             menu_list.append(menu)
-                        
+
                         # 메뉴 그룹 데이터 정의 (메뉴 루프 밖에서)
                         menu_group_data = {
-                            "name": menu_group_description,
+                            "name": menu_group_name,
                             "menus": menu_list,
                         }
-                        
+
                         # menu_group_list에 메뉴 그룹 데이터 추가 (메뉴 루프 밖에서)
                         menu_group_list.append(menu_group_data)
 
@@ -138,7 +156,6 @@ class RestaurantGetDetailView(APIView):
                     "menu_group_list": menu_group_list,
                 }
                 return Response(res, status=status.HTTP_200_OK)
-
 
             else:
                 return Response(
@@ -173,7 +190,9 @@ class MenuGetDetailView(APIView):
 
                 option_group_detail = []
                 # Restaurant_id 가 같은 Menu_group_id를 가져온다
-                option_group_ids = Option_group_to_menu.objects.filter(menu=menu.id).values("option_group_id")
+                option_group_ids = Option_group_to_menu.objects.filter(
+                    menu=menu.id
+                ).values("option_group_id")
 
                 for option_group in option_group_ids:
                     option_list = []
@@ -191,7 +210,7 @@ class MenuGetDetailView(APIView):
                     if option_group_value:
                         # 컬럼 형식에서 description의 내용만 가져온다.
                         option_group_description = option_group_value["name"]
-                        
+
                         # Menu_group과 같은 방식으로 Menu의 컬럼들의 데이터를 가져온다.
                         # Menu_group_id와 같은 Menu_id를 가지고 있는 데이터들을 queryset으로 나눈다.
                         options = Option.objects.filter(
@@ -232,23 +251,42 @@ class MenuGetDetailView(APIView):
             )
 
 
-
-
 class MenuStatusView(APIView):
     def post(self, request):
+        # JWT 인증 생략
+        menus_data = request.data.get("menus", [])
 
-        JWT_authenticator = JWTAuthentication()
-        is_validated_token = JWT_authenticator.authenticate(request)
-        
-        if is_validated_token:
-            menu_ids = request.data.get("menu_id", [])  # 클라이언트가 보낸 메뉴 ID
+        if not menus_data:
+            return Response(
+                {"message": "No menus data provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-            if not menu_ids:
-                return Response({"message": "No menu_id provided"}, status=status.HTTP_400_BAD_REQUEST)
+        response_data = []
+        total_price = 0
+        for menu_data in menus_data:
+            menu_id = menu_data.get("menu")
+            quantity = menu_data.get("quantity", 1)  # 기본 수량을 1로 설정
+            options_data = menu_data.get("options", [])
 
-            response_data = {}
-            for menu_id in menu_ids:
-                menu = Menu.objects.get(id=menu_id)
-                response_data[menu.id] = menu.status
-                
-            return Response(response_data)
+            menu = Menu.objects.get(id=menu_id)
+            menu_price = menu.price * quantity
+            option_price = 0
+
+            for option_group in options_data:
+                option_ids = option_group.get("options", [])
+                for option_id in option_ids:
+                    option = Option.objects.get(id=option_id)
+                    option_price += (
+                        option.price * quantity
+                    )  # 옵션 가격을 메뉴 수량만큼 곱합니다.
+
+            price = menu_price + option_price
+            menu_status = menu.status
+            total_price += price
+            response_data.append(
+                {"menu_id": menu_id, "menu_status": menu_status, "price": price}
+            )
+        res = {"menus": response_data, "total_price": total_price}
+
+        return Response(res, status=status.HTTP_200_OK)
