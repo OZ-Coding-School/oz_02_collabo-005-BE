@@ -106,6 +106,7 @@ class RestaurantGetDetailView(APIView):
                     menu_list = []
                     menu_group_id = menu_group["id"]
                     
+                    
                     # Menu_group에서 정보 가져오기
                     menu_group_value = Menu_group.objects.filter(id=menu_group_id).values("name").first()
                     if menu_group_value:
@@ -137,6 +138,7 @@ class RestaurantGetDetailView(APIView):
                     "menu_group_list": menu_group_list,
                 }
                 return Response(res, status=status.HTTP_200_OK)
+
             else:
                 return Response(
                     {"error": "restaurantId parameter is required"},
