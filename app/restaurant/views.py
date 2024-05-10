@@ -104,47 +104,39 @@ class RestaurantGetDetailView(APIView):
 
                 for menu_group in menu_group_ids:
                     menu_list = []
-
                     menu_group_id = menu_group["id"]
-
-                    # Menu_group에서 description의 값들을 가져온다.
-                    menu_group_value = (
-                        Menu_group.objects.filter(id=menu_group_id)
-                        .values("name")
-                        .first()
-                    )
-                    # description이라는 컬럼이 있는 데이터들의 값만 가져온다
+                    
+                    # Menu_group에서 정보 가져오기
+                    menu_group_value = Menu_group.objects.filter(id=menu_group_id).values("name").first()
                     if menu_group_value:
-                        # 컬럼 형식에서 description의 내용만 가져온다.
                         menu_group_description = menu_group_value["name"]
-
-                        # Menu_group과 같은 방식으로 Menu의 컬럼들의 데이터를 가져온다.
-                        # Menu_group_id와 같은 Menu_id를 가지고 있는 데이터들을 queryset으로 나눈다.
-                        menus = Menu.objects.filter(menu_group=menu_group_id).values(
-                            "id", "picture", "name", "price", "description"
-                        )
-
-                        # menus에서 가져온 데이터를 하나씩 menu_list에 추가한다
+                        
+                        # 메뉴 정보 가져오기
+                        menus = Menu.objects.filter(menu_group=menu_group_id).values("id", "picture", "name", "price", "description", "represent", "status")
+                        
                         for menu in menus:
                             menu_list.append(menu)
-                            # Menu_group에 description 데이터를 가져오고 Menu에서 가져온 각 데이터들을
-                            # menu_group_data에 튜플 형태로 넣어준다.
-                            menu_group_data = {
-                                "name": menu_group_description,
-                                "menus": menu_list,
-                            }
-                            menu_group_list.append(menu_group_data)
-
-                        res = {
-                            "id": restaurant.id,
-                            "name": restaurant.name,
-                            "notice": restaurant.notice,
-                            "image": restaurant.representative_menu_picture,
-                            "description": restaurant.description,
-                            "minimum_order_amount": restaurant.minimum_order_amount,
-                            "menu_group_list": menu_group_list,
+                        
+                        # 메뉴 그룹 데이터 정의 (메뉴 루프 밖에서)
+                        menu_group_data = {
+                            "name": menu_group_description,
+                            "menus": menu_list,
                         }
-                        return Response(res, status=status.HTTP_200_OK)
+                        
+                        # menu_group_list에 메뉴 그룹 데이터 추가 (메뉴 루프 밖에서)
+                        menu_group_list.append(menu_group_data)
+
+                # 모든 메뉴 그룹에 대한 정보가 menu_group_list에 추가된 후, 응답 생성
+                res = {
+                    "id": restaurant.id,
+                    "name": restaurant.name,
+                    "notice": restaurant.notice,
+                    "image": restaurant.representative_menu_picture,
+                    "description": restaurant.description,
+                    "minimum_order_amount": restaurant.minimum_order_amount,
+                    "menu_group_list": menu_group_list,
+                }
+                return Response(res, status=status.HTTP_200_OK)
             else:
                 return Response(
                     {"error": "restaurantId parameter is required"},
