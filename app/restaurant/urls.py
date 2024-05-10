@@ -7,8 +7,8 @@ urlpatterns = [
     path("list/", RestaurantGetListView.as_view(), name="restaurant-list"),
     # api/v1/restaurant/menu/status/
     path("menu/status/", MenuStatusView.as_view(), name="menu-status"),
-    # api/v1/restaurant/menu/list?restaurantId=1
-    path("menu/list", RestaurantGetDetailView.as_view(), name="restaurant-detail"),
+    # api/v1/restaurant/detail?restaurantId=1
+    path("detail", RestaurantGetDetailView.as_view(), name="restaurant-detail"),
     # api/v1/restaurant/option/list?menuId=1
     path("option/list", MenuGetDetailView.as_view(), name="menu-option-detail"),
 ]
