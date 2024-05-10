@@ -110,13 +110,13 @@ class RestaurantGetDetailView(APIView):
                     # Menu_group에서 description의 값들을 가져온다.
                     menu_group_value = (
                         Menu_group.objects.filter(id=menu_group_id)
-                        .values("description")
+                        .values("name")
                         .first()
                     )
                     # description이라는 컬럼이 있는 데이터들의 값만 가져온다
                     if menu_group_value:
                         # 컬럼 형식에서 description의 내용만 가져온다.
-                        menu_group_description = menu_group_value["description"]
+                        menu_group_description = menu_group_value["name"]
 
                         # Menu_group과 같은 방식으로 Menu의 컬럼들의 데이터를 가져온다.
                         # Menu_group_id와 같은 Menu_id를 가지고 있는 데이터들을 queryset으로 나눈다.
@@ -127,13 +127,13 @@ class RestaurantGetDetailView(APIView):
                         # menus에서 가져온 데이터를 하나씩 menu_list에 추가한다
                         for menu in menus:
                             menu_list.append(menu)
-                        # Menu_group에 description 데이터를 가져오고 Menu에서 가져온 각 데이터들을
-                        # menu_group_data에 튜플 형태로 넣어준다.
-                        menu_group_data = {
-                            "description": menu_group_description,
-                            "menus": menu_list,
-                        }
-                        menu_group_list.append(menu_group_data)
+                            # Menu_group에 description 데이터를 가져오고 Menu에서 가져온 각 데이터들을
+                            # menu_group_data에 튜플 형태로 넣어준다.
+                            menu_group_data = {
+                                "name": menu_group_description,
+                                "menus": menu_list,
+                            }
+                            menu_group_list.append(menu_group_data)
 
                         res = {
                             "id": restaurant.id,
@@ -141,7 +141,7 @@ class RestaurantGetDetailView(APIView):
                             "notice": restaurant.notice,
                             "image": restaurant.representative_menu_picture,
                             "description": restaurant.description,
-                            "delivery_fee": restaurant.delivery_fee,
+                            "minimum_order_amount": restaurant.minimum_order_amount,
                             "menu_group_list": menu_group_list,
                         }
                         return Response(res, status=status.HTTP_200_OK)
@@ -247,6 +247,9 @@ class MenuStatusView(APIView):
         
         if is_validated_token:
             menu_ids = request.data.get("menu_id", [])  # 클라이언트가 보낸 메뉴 ID
+
+            if not menu_ids:
+                return Response({"message": "No menu_id provided"}, status=status.HTTP_400_BAD_REQUEST)
 
             response_data = {}
             for menu_id in menu_ids:
