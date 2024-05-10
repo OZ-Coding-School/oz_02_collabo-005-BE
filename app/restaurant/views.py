@@ -149,6 +149,7 @@ class RestaurantGetDetailView(APIView):
                 res = {
                     "id": restaurant.id,
                     "name": restaurant.name,
+                    "logo": restaurant.logo,
                     "notice": restaurant.notice,
                     "image": restaurant.representative_menu_picture,
                     "description": restaurant.description,
