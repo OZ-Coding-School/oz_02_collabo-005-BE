@@ -3,6 +3,7 @@ from .models import User, Address
 
 
 class UserSerializer(serializers.ModelSerializer):
+
     current_password = serializers.CharField(
         write_only=True, required=False, allow_blank=True
     )
@@ -22,6 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
             "new_password",
         ]
         
+
         extra_kwargs = {
             "password": {"write_only": True},  # 패스워드 필드는 읽기 전용으로 설정
             "birthday": {"required": False},
@@ -35,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
+
         current_password = validated_data.pop("current_password", None)
         new_password = validated_data.pop("new_password", None)
 
@@ -50,6 +53,7 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"passwords": "현재 비밀번호와 새 비밀번호 모두를 제공해야 합니다."}
             )
+
 
 
         return super().update(instance, validated_data)
