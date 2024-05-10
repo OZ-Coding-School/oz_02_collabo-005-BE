@@ -127,7 +127,7 @@ class Menu_group(CommonModel):
     restaurant = models.ForeignKey(
         Restaurant, related_name="menu_groups", on_delete=models.CASCADE
     )
-    description = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
 
 
 class Menu(CommonModel):
