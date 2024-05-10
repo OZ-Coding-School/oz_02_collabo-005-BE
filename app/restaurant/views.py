@@ -139,6 +139,7 @@ class RestaurantGetDetailView(APIView):
                 }
                 return Response(res, status=status.HTTP_200_OK)
 
+
             else:
                 return Response(
                     {"error": "restaurantId parameter is required"},
