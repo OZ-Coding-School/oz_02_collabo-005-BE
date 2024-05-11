@@ -1,5 +1,5 @@
 class JSONDataFormatter:
-    def __init__(self, status):
+    def __init__(self, status=200):
         self.status = status
         self.message = ""
         self.additional_datas = []
@@ -10,6 +10,7 @@ class JSONDataFormatter:
 
     def get_response_data(self):
         data = {
+            "code": self.status,
             "message": self.message,
         }
         for additional_data in self.additional_datas:
