@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import auth_views as av, test_views as tv
+from .views import auth_views as av, test_views as tv, restaurant_views as rv
 
 urlpatterns = [
     ### base: api/v1/admin/ ###
@@ -9,7 +9,7 @@ urlpatterns = [
 
     ### restaurant ###
     # restaurant/list
-    path("restaurant/list", av.AdminLoginView.as_view(), name="admin-restaurant-list"),
+    path("restaurant/list/", rv.RestaurantListView.as_view(), name="admin-restaurant-list"),
     
 
 
