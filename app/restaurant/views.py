@@ -112,7 +112,6 @@ class RestaurantGetDetailView(APIView):
                     menu_list = []
                     menu_group_id = menu_group["id"]
 
-
                     # Menu_group에서 정보 가져오기
                     menu_group_value = (
                         Menu_group.objects.filter(id=menu_group_id)
@@ -154,6 +153,9 @@ class RestaurantGetDetailView(APIView):
                     "image": restaurant.representative_menu_picture,
                     "description": restaurant.description,
                     "minimum_order_amount": restaurant.minimum_order_amount,
+                    "opening_time": restaurant.opening_time,
+                    "closing_time": restaurant.closing_time,
+                    "status": restaurant.status,
                     "menu_group_list": menu_group_list,
                 }
                 return Response(res, status=status.HTTP_200_OK)
