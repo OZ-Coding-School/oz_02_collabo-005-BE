@@ -30,6 +30,7 @@ class RestaurantGetListView(APIView):
                 "delivery_fee",
                 "representative_menu_picture",
                 "notice",
+                "status",
             )
 
             # for restaurant in restaurants에서 빠져나온 값 들을 하나씩 List 형태로 저장한다.
@@ -73,6 +74,7 @@ class RestaurantGetListView(APIView):
                     "hashtag": hashtag_list,
                     "category": category_list,
                     "notice": restaurant["notice"],
+                    "status": restaurant["status"],
                 }
                 response_data.append(res)
 
