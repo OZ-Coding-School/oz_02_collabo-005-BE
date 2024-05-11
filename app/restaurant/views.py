@@ -30,6 +30,7 @@ class RestaurantGetListView(APIView):
                 "delivery_fee",
                 "representative_menu_picture",
                 "notice",
+                "status",
             )
 
             # for restaurant in restaurants에서 빠져나온 값 들을 하나씩 List 형태로 저장한다.
@@ -73,6 +74,7 @@ class RestaurantGetListView(APIView):
                     "hashtag": hashtag_list,
                     "category": category_list,
                     "notice": restaurant["notice"],
+                    "status": restaurant["status"],
                 }
                 response_data.append(res)
 
@@ -111,7 +113,6 @@ class RestaurantGetDetailView(APIView):
                 for menu_group in menu_group_ids:
                     menu_list = []
                     menu_group_id = menu_group["id"]
-
 
                     # Menu_group에서 정보 가져오기
                     menu_group_value = (
@@ -154,6 +155,9 @@ class RestaurantGetDetailView(APIView):
                     "image": restaurant.representative_menu_picture,
                     "description": restaurant.description,
                     "minimum_order_amount": restaurant.minimum_order_amount,
+                    "opening_time": restaurant.opening_time,
+                    "closing_time": restaurant.closing_time,
+                    "status": restaurant.status,
                     "menu_group_list": menu_group_list,
                 }
                 return Response(res, status=status.HTTP_200_OK)
