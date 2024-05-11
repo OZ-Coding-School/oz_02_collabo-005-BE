@@ -60,16 +60,7 @@ class Restaurant(CommonModel):
     minimum_order_amount = models.PositiveIntegerField()
     opening_time = models.TimeField()
     closing_time = models.TimeField()
-
-    @property
-    def status(self):
-        now = timezone.now().time()
-        if self.opening_time <= now < self.closing_time:
-            return 1  # Open
-        elif now < self.opening_time or now >= self.closing_time:
-            return 2  # Closed
-        else:
-            return 3  # Under Maintenance
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=2)
 
     def __str__(self):
         return f"({self.id}){self.name}"
