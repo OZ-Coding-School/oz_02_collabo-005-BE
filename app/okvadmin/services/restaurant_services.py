@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from common.utils.response_formatter import JSONDataFormatter
 
 from restaurant.models import Restaurant
+from okvadmin.serializers.restaurant_serializers import RestaurantListSerializer
 
 
 class RestaurantListService:
