@@ -10,5 +10,5 @@ urlpatterns = [
     # api/v1/restaurant/menu/status/
     path("menu/status/", MenuStatusView.as_view(), name="menu-status"),
     # api/v1/restaurant/menu/detail?menuId=1
-    path("menu/detail?", MenuGetDetailView.as_view(), name="menu-option-detail"),
+    path("menu/detail", MenuGetDetailView.as_view(), name="menu-option-detail"),
 ]
