@@ -181,7 +181,6 @@ class MenuGetDetailView(APIView):
 
         if is_validated_token:
             menu_id = request.GET.get("menuId")
-            response_data = []
             # get요청으로 restaurant_id을 받아옴
             # restaurant_id가 있다면 try 없으면 except(예외 처리)
             if menu_id:
@@ -207,46 +206,47 @@ class MenuGetDetailView(APIView):
                     # Menu_group에서 description의 값들을 가져온다.
                     option_group_value = (
                         Option_group.objects.filter(id=option_group_id)
-                        .values("name", "mandatory")
+                        .values(
+                            "name", "mandatory", "choice_mode", "maximum", "minimum"
+                        )
                         .first()
                     )
 
                     # description이라는 컬럼이 있는 데이터들의 값만 가져온다
                     if option_group_value:
-                        # 컬럼 형식에서 description의 내용만 가져온다.
-                        option_group_description = option_group_value["name"]
-                        option_group_mandatory = option_group_value["mandatory"]
-
-                        # Menu_group과 같은 방식으로 Menu의 컬럼들의 데이터를 가져온다.
-                        # Menu_group_id와 같은 Menu_id를 가지고 있는 데이터들을 queryset으로 나눈다.
                         options = Option.objects.filter(
                             option_group=option_group_id
-                        ).values(
-                            "id",
-                            "name",
-                            "price",
-                        )
+                        ).values("id", "name", "price")
+
                         # menus에서 가져온 데이터를 하나씩 menu_list에 추가한다
                         for option in options:
                             option_list.append(option)
                         # Menu_group에 description 데이터를 가져오고 Menu에서 가져온 각 데이터들을
                         # menu_group_data에 튜플 형태로 넣어준다.
                         option_group_data = {
-                            "option_name": option_group_description,
-                            "mandatory": option_group_mandatory,
+                            "option_name": option_group_value["name"],
+                            "mandatory": option_group_value["mandatory"],
+                            "choice_mode": option_group_value["choice_mode"],
                             "options": option_list,
                         }
+                        if option_group_value["choice_mode"] == 2:
+                            option_group_data["maximum"] = option_group_value.get(
+                                "maximum", None
+                            )
+                            option_group_data["minimum"] = option_group_value.get(
+                                "minimum", None
+                            )
+
                         option_group_detail.append(option_group_data)
 
-                res = {
-                    "id": menu.id,
-                    "name": menu.name,
-                    "image": menu.picture,
-                    "description": menu.description,
-                    "option_group_list": option_group_detail,
-                }
-                response_data.append(res)
-                return Response(response_data, status=status.HTTP_200_OK)
+                    res = {
+                        "id": menu.id,
+                        "name": menu.name,
+                        "image": menu.picture,
+                        "description": menu.description,
+                        "option_group_list": option_group_detail,
+                    }
+                return Response(res, status=status.HTTP_200_OK)
             else:
                 return Response(
                     {"error": "menuId parameter is required"},
