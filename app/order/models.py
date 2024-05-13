@@ -24,6 +24,8 @@ class Order(CommonModel):
     total_price = models.PositiveIntegerField(null=True, default=None)
     order_time = models.DateTimeField(auto_now_add=True)
     cancle_reason = models.TextField(null=True, default=None)
+    order_price = models.PositiveBigIntegerField(null=True, default=0)
+    delivery_fee = models.PositiveSmallIntegerField(null=True, default=0)
 
     def clean(self):
         # total_price 필드에 대한 음수 값 확인
@@ -76,12 +78,10 @@ class Order_detail(CommonModel):
 
 class Order_option(CommonModel):
 
-
     order_detail = models.ForeignKey(Order_detail, on_delete=models.CASCADE)
     option_name = models.CharField(max_length=255)
     option_price = models.PositiveIntegerField(null=True, default=None)
     option_group_name = models.CharField(max_length=30)
-
 
     def __str__(self):
         return f"Order Option - Group: {self.Order_detail.order_group_name}, Name: {self.option_name}, Price: {self.option_price}"
