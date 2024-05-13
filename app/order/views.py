@@ -10,23 +10,54 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Order
 from .serializers import *
 
+from common.utils.geo_utils import (
+    check_coordinate_in_polygon,
+    get_coordinates_distance_km,
+)
+
 
 class OrderCreateView(APIView):
     def post(self, request):
         JWT_authenticator = JWTAuthentication()
         is_validated_token = JWT_authenticator.authenticate(request)
-
         if is_validated_token:
-            user = is_validated_token[0]
-            request.data["user_id"] = user.id
-            serializer = OrderSerializer(data=request.data)
-            if serializer.is_valid():
-                a = serializer.create(request.data)
-                res = {"order": a.id, "message": "Success Created Order"}
-                stat = status.HTTP_201_CREATED
-            else:
-                res = {"error": serializer.errors}
+            coor = request.data.get("coordinate", None)
+            if not coor:
+                return Response(
+                    {"code": 400, "message": "No coordinate"},
+                    stat=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if not check_coordinate_in_polygon(coor):
+                res = {"code": 400, "message": "Coordinate is invalid"}
                 stat = status.HTTP_400_BAD_REQUEST
+            else:
+                user = is_validated_token[0]
+                request.data["user_id"] = user.id
+                request.data.pop("coordinate")
+                serializer = OrderSerializer(data=request.data)
+                if serializer.is_valid():
+                    a = serializer.create(request.data)
+                    res = {"order": a.id, "message": "Success Created Order"}
+
+                    distance = abs(
+                        get_coordinates_distance_km(coor, (37.07967, 127.05227))
+                    )
+                    print(distance, a.total_price)
+                    delivery_fee = 0
+                    if a.total_price < 16900:
+                        delivery_fee = 4400
+
+                    if distance >= 1.5:
+                        while distance > 0:
+                            delivery_fee += 500
+                            distance -= 0.5
+                    res.update({"delivery_fee": delivery_fee})
+                    stat = status.HTTP_201_CREATED
+                    print(res)
+                else:
+                    res = {"error": serializer.errors}
+                    stat = status.HTTP_400_BAD_REQUEST
         else:
             res = {"error": "Invalid token"}
             stat = status.HTTP_401_UNAUTHORIZED
@@ -54,7 +85,9 @@ class OrderGetListView(APIView):
                     total_price = menu.price * order_detail.quantity
                     options_list = []
 
-                    order_options = Order_option.objects.filter(order_detail=order_detail)
+                    order_options = Order_option.objects.filter(
+                        order_detail=order_detail
+                    )
                     for order_option in order_options:
                         options_res = {"option_name": order_option.option_name}
                         options_list.append(options_res)
@@ -84,4 +117,3 @@ class OrderGetListView(APIView):
                 }
                 response_data.append(res)
             return Response(response_data)
-
