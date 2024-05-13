@@ -181,7 +181,6 @@ class MenuGetDetailView(APIView):
 
         if is_validated_token:
             menu_id = request.GET.get("menuId")
-            response_data = []
             # get요청으로 restaurant_id을 받아옴
             # restaurant_id가 있다면 try 없으면 except(예외 처리)
             if menu_id:
@@ -240,15 +239,14 @@ class MenuGetDetailView(APIView):
 
                         option_group_detail.append(option_group_data)
 
-                res = {
-                    "id": menu.id,
-                    "name": menu.name,
-                    "image": menu.picture,
-                    "description": menu.description,
-                    "option_group_list": option_group_detail,
-                }
-                response_data.append(res)
-                return Response(response_data, status=status.HTTP_200_OK)
+                    res = {
+                        "id": menu.id,
+                        "name": menu.name,
+                        "image": menu.picture,
+                        "description": menu.description,
+                        "option_group_list": option_group_detail,
+                    }
+                return Response(res, status=status.HTTP_200_OK)
             else:
                 return Response(
                     {"error": "menuId parameter is required"},
