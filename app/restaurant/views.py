@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import *
 
@@ -18,7 +19,6 @@ class RestaurantGetListView(APIView):
         # 토큰 인증
         JWT_authenticator = JWTAuthentication()
         is_validated_token = JWT_authenticator.authenticate(request)
-
         if is_validated_token:
 
             restaurant_detail = request.GET.get("id", None)
@@ -260,7 +260,6 @@ class MenuGetDetailView(APIView):
 
 class MenuStatusView(APIView):
     def post(self, request):
-        # JWT 인증 생략
         menus_data = request.data.get("menus", [])
 
         if not menus_data:
@@ -273,27 +272,57 @@ class MenuStatusView(APIView):
         total_price = 0
         for menu_data in menus_data:
             menu_id = menu_data.get("menu")
-            quantity = menu_data.get("quantity", 1)  # 기본 수량을 1로 설정
+            quantity = menu_data.get("quantity", 1)
             options_data = menu_data.get("options", [])
 
-            menu = Menu.objects.get(id=menu_id)
+            # menu_id가 없을 때 출력되는 예외처리
+            try:
+                menu = Menu.objects.get(id=menu_id)
+            except ObjectDoesNotExist:
+                return Response(
+                    {"message": f"Menu with id {menu_id} does not exist"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
             menu_price = menu.price * quantity
             option_price = 0
+            for option_group_data in options_data:
+                option_group_id = option_group_data.get("group")
+                option_ids = option_group_data.get("options", [])
 
-            for option_group in options_data:
-                option_ids = option_group.get("options", [])
+                # option_group_id가 존재하지 않으면 출력되는 예외처리
+                try:
+                    Option_group.objects.get(id=option_group_id)
+                except ObjectDoesNotExist:
+                    return Response(
+                        {"message": f"Option group with id {option_group_id} does not exist"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+
+                # quantity가 0값이면 출력되는 예외처리
+                if quantity < 1:
+                    return Response(
+                        {"message": "Quantity must be at least 1"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                
+                # option_id가 없으면 message를 출력하는 예외처리
                 for option_id in option_ids:
-                    option = Option.objects.get(id=option_id)
-                    option_price += (
-                        option.price * quantity
-                    )  # 옵션 가격을 메뉴 수량만큼 곱합니다.
+                    try:
+                        option = Option.objects.get(id=option_id)
+                    except ObjectDoesNotExist:
+                        return Response(
+                            {"message": f"Option with id {option_id} does not exist"},
+                            status=status.HTTP_404_NOT_FOUND,
+                        )
+                    option_price += option.price
 
-            price = menu_price + option_price
+            price = menu_price + option_price * quantity  # 옵션 가격에 옵션 수량을 곱합니다.
             menu_status = menu.status
             total_price += price
             response_data.append(
                 {"menu_id": menu_id, "menu_status": menu_status, "price": price}
             )
-        res = {"menus": response_data, "total_price": total_price}
 
+        res = {"menus": response_data, "total_price": total_price}
         return Response(res, status=status.HTTP_200_OK)
