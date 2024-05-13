@@ -152,6 +152,7 @@ class Option_group(CommonModel):
     mandatory = models.BooleanField(default=False)
     choice_mode = models.PositiveIntegerField(choices=STATUS_CHOICES, default=2)
     maximum = models.PositiveIntegerField(default=1)
+    minimum = models.IntegerField(default=0)
 
 
 class Option_group_to_menu(CommonModel):
