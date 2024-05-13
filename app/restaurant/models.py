@@ -51,9 +51,9 @@ class Restaurant(CommonModel):
     )
 
     name = models.CharField(max_length=50)
-    logo = models.URLField(null=True, default=None)
+    logo_image_url = models.URLField(null=True, default=None)
     representative_menu = models.PositiveIntegerField(null=True, default=None)
-    representative_menu_picture = models.URLField(null=True, default=None)
+    representative_menu_image = models.URLField(null=True, default=None)
     description = models.TextField(null=True, default=None)
     notice = models.TextField(null=True, default=None)
     delivery_fee = models.PositiveIntegerField(null=True, default=None)
