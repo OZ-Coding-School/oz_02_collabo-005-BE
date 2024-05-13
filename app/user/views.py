@@ -254,3 +254,28 @@ class AddressUpdateView(APIView):
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+from common.utils.geo_utils import check_coordinate_in_polygon
+
+
+class AddressCoordinateWithinPolygonView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        lan = request.GET.get("lan", None)
+        long = request.GET.get("long", None)
+        if not lan or not long:
+            return Response(
+                {"code": 400, "message": "No lan or long"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        coor = (lan, long)
+        return Response(
+            {
+                "code": 200,
+                "message": "Check coordinate is success",
+                "data": {"result": check_coordinate_in_polygon(coor)},
+            }
+        )
