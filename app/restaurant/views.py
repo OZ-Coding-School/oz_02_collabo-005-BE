@@ -207,7 +207,7 @@ class MenuGetDetailView(APIView):
                     option_group_value = (
                         Option_group.objects.filter(id=option_group_id)
                         .values(
-                            "name", "mandatory", "choice_mode", "maximum", "minimum"
+                            "id", "name", "mandatory", "choice_mode", "maximum", "minimum"
                         )
                         .first()
                     )
@@ -224,6 +224,7 @@ class MenuGetDetailView(APIView):
                         # Menu_group에 description 데이터를 가져오고 Menu에서 가져온 각 데이터들을
                         # menu_group_data에 튜플 형태로 넣어준다.
                         option_group_data = {
+                            "option_group_id": option_group_value["id"],
                             "option_name": option_group_value["name"],
                             "mandatory": option_group_value["mandatory"],
                             "choice_mode": option_group_value["choice_mode"],
@@ -271,9 +272,9 @@ class MenuStatusView(APIView):
         response_data = []
         total_price = 0
         for menu_data in menus_data:
-            menu_id = menu_data.get("menu")
+            menu_id = menu_data.get("menu_id")
             quantity = menu_data.get("quantity", 1)
-            options_data = menu_data.get("options", [])
+            options_data = menu_data.get("option_list", [])
 
             # menu_id가 없을 때 출력되는 예외처리
             try:
@@ -287,7 +288,7 @@ class MenuStatusView(APIView):
             menu_price = menu.price * quantity
             option_price = 0
             for option_group_data in options_data:
-                option_group_id = option_group_data.get("group")
+                option_group_id = option_group_data.get("group_id")
                 option_ids = option_group_data.get("options", [])
 
                 # option_group_id가 존재하지 않으면 출력되는 예외처리
