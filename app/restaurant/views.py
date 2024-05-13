@@ -28,7 +28,7 @@ class RestaurantGetListView(APIView):
                 "name",
                 "description",
                 "delivery_fee",
-                "representative_menu_picture",
+                "representative_menu_image",
                 "notice",
                 "status",
             )
@@ -70,7 +70,7 @@ class RestaurantGetListView(APIView):
                 res = {
                     "id": restaurant["id"],
                     "name": restaurant["name"],
-                    "image": restaurant["representative_menu_picture"],
+                    "image": restaurant["representative_menu_image"],
                     "hashtag": hashtag_list,
                     "category": category_list,
                     "notice": restaurant["notice"],
@@ -150,9 +150,9 @@ class RestaurantGetDetailView(APIView):
                 res = {
                     "id": restaurant.id,
                     "name": restaurant.name,
-                    "logo": restaurant.logo,
+                    "logo": restaurant.logo_image_url,
                     "notice": restaurant.notice,
-                    "image": restaurant.representative_menu_picture,
+                    "image": restaurant.representative_menu_image,
                     "description": restaurant.description,
                     "minimum_order_amount": restaurant.minimum_order_amount,
                     "opening_time": restaurant.opening_time,
