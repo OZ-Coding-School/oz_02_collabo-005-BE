@@ -263,15 +263,15 @@ class AddressCoordinateWithinPolygonView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        lan = request.GET.get("lan", None)
-        long = request.GET.get("long", None)
-        if not lan or not long:
+        lat = request.GET.get("lat", None)
+        lng = request.GET.get("lng", None)
+        if not lat or not lng:
             return Response(
-                {"code": 400, "message": "No lan or long"},
+                {"code": 400, "message": "No lat or lng"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        coor = (lan, long)
+        coor = (lat, lng)
         return Response(
             {
                 "code": 200,

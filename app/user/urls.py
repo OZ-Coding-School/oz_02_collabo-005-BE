@@ -19,6 +19,6 @@ urlpatterns = [
     path("address/", AddressView.as_view(), name="user-address"),
     # api/v1/user/address/update/
     path("address/update/", AddressUpdateView.as_view(), name="user-address-update"),
-    # api/v1/user/address/check-coordinate/
+    # api/v1/user/address/check-coordinate/?lat=36.xxxx&lng=127.xxxx
     path("address/check-coordinate/", AddressCoordinateWithinPolygonView.as_view(), name="user-address-check-coordinate")
 ]
