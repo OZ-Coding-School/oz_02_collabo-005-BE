@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User, Address
-
+import re
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -29,6 +29,27 @@ class UserSerializer(serializers.ModelSerializer):
             "birthday": {"required": False},
         }
 
+    
+    def validate_password(self, value):
+        # 비밀번호 정규식
+        password_regex = re.compile(r'^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_]).{8,16}$')
+
+        # 비밀번호가 정규식에 맞는지 확인
+        if not password_regex.match(value):
+            raise serializers.ValidationError("비밀번호는 영문, 숫자, 특수문자를 포함하여 8~16자여야 합니다.")
+            # 공백 포함 여부 확인
+        if ' ' in value:
+            raise serializers.ValidationError("패스워드는 공백을 포함할 수 없습니다.")
+
+        return value
+    
+    def validate_phone_number(self, value):
+        # 하이픈 없이 010으로 시작하고 뒤에 8자리 숫자가 오는 대한민국 휴대폰 번호 정규식 (예: 01012345678)
+        phone_regex = re.compile(r'^010\d{8}$')
+        if not phone_regex.match(value):
+            raise serializers.ValidationError("유효하지 않은 휴대폰 번호 형식입니다.")
+        return value
+    
     def create(self, validated_data):
         password = validated_data.pop("password")
         user = User(**validated_data)
@@ -37,12 +58,14 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-
         current_password = validated_data.pop("current_password", None)
         new_password = validated_data.pop("new_password", None)
 
         # current_password와 new_password가 모두 제공되었고, 빈 문자열이 아닌 경우에만 비밀번호 변경 로직 실행
         if current_password and new_password:
+            # new_password 유효성 검사 실행
+            self.validate_password(new_password)
+
             if not instance.check_password(current_password):
                 raise serializers.ValidationError(
                     {"current_password": "현재 비밀번호가 올바르지 않습니다."}
@@ -53,8 +76,6 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"passwords": "현재 비밀번호와 새 비밀번호 모두를 제공해야 합니다."}
             )
-
-
 
         return super().update(instance, validated_data)
 
