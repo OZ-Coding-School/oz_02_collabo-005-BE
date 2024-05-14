@@ -141,6 +141,7 @@ class Delivery_fee_info(CommonModel):
     name = models.CharField(max_length=20)
     delivery_fee = models.PositiveIntegerField(null=True, default=None)
     code = models.CharField(max_length=20)
-
+    status = models.BooleanField(default=0)
+    
     def __str__(self):
         return self.name
