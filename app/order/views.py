@@ -103,7 +103,7 @@ class OrderGetListView(APIView):
                     restaurant_res = {
                         "restaurant_id": restaurant.id,
                         "restaurant_name": restaurant.name,
-                        "picture": restaurant.representative_menu_picture,
+                        "image": restaurant.representative_menu_image,
                         "menu_name": menu_res,
                     }
 
@@ -117,3 +117,21 @@ class OrderGetListView(APIView):
                 }
                 response_data.append(res)
             return Response(response_data)
+
+
+from .services import CartCheckService
+from common.utils.response_formatter import JSONDataFormatter
+from common.errors import CustomError
+
+
+class CartCheckView(APIView):
+    def post(self, request):
+        formatter = JSONDataFormatter()
+        try:
+            ccs = CartCheckService(request)
+            formatter.add_response_data({"data": ccs.get_response_data()})
+            formatter.message = "Request complete"
+        except CustomError as e:
+            formatter.set_status_and_message(e.status, e.message)
+
+        return Response(formatter.get_response_data(), status=formatter.status)

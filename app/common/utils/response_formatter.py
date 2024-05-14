@@ -4,6 +4,10 @@ class JSONDataFormatter:
         self.message = ""
         self.additional_datas = []
 
+    def set_status_and_message(self, status, message):
+        self.status = status
+        self.message = message
+
     def add_response_data(self, *datas):
         for data in datas:
             self.additional_datas.append(data)
