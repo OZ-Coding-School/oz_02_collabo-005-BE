@@ -65,8 +65,8 @@ class CartCheckService(BasicServiceClass):
         multiple_menu_serializer = CartMenuCheckSerializers(data=self.request.data)
         multiple_menu_serializer.is_valid(raise_exception=True)
 
-        menu_data = multiple_menu_serializer.validated_data
-        result = {"menus": menu_data}
+        orders = multiple_menu_serializer.validated_data
+        result = {"orders": orders}
 
         coor = self.request.data.get("coordinate", None)
         if not coor:
@@ -91,12 +91,15 @@ class CartCheckService(BasicServiceClass):
     def set_price_data(self, data):
         osu = OrderServiceUtils()
         order_price = 0
-        for menu in data['menus']:
-            menu_price = 0
-            if menu['status']:
-                menu_price = osu.get_menu_price(menu)
-            menu['menu_total_price'] = menu_price
-            order_price += menu_price
+        for order in data['orders']:
+            pp(order)
+            for menu in order['menus']:
+                pp(menu)
+                menu_price = 0
+                if menu['status']:
+                    menu_price = osu.get_menu_price(menu)
+                menu['menu_total_price'] = menu_price
+                order_price += menu_price
 
         coor = self.request.data.get("coordinate", None)
         if coor:
