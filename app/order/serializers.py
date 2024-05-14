@@ -149,7 +149,7 @@ class CartMenuCheckSerializers(serializers.Serializer):
                         f"Option with id {option_id} is not connected to the menu with id {menu_id}"
                     )
 
-                menu_info["options"].append({option.id: option.price})
+                menu_info["options"].append({"id": option.id, "price": option.price})
 
             validated_data.append(menu_info)
 
