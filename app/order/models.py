@@ -136,3 +136,11 @@ class Delivery(CommonModel):
 
     def __str__(self):
         return f"Delivery - Order: {self.order}, Delivery Man: {self.delivery_man}, Estimated Time: {self.estimated_time}, Completion Time: {self.completion_time}"
+
+class Delivery_fee_info(CommonModel):
+    name = models.CharField(max_length=20)
+    delivery_fee = models.PositiveIntegerField(null=True, default=None)
+    code = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
