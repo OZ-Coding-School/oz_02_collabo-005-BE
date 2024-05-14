@@ -134,7 +134,6 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-
 class LogoutView(APIView):
     # Authorization의 토큰 값과 유저의 토큰 값이 일치하는지 확인
     authentication_classes = [JWTAuthentication]  # simple-jwt JWTAuthentication 사용
@@ -196,7 +195,6 @@ class DeleteView(APIView):
             return Response(
                 {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
 
 class AddressView(APIView):
     """
