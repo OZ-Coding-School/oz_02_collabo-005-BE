@@ -90,22 +90,28 @@ class LoginView(APIView):
     """
 
     def post(self, request):
-        # email값과 password값 받기
-        user = authenticate(
-            email=request.data.get("email"), password=request.data.get("password")
-        )
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        # 이메일이나 비밀번호가 제공되지 않았을 경우
+        if not email or not password:
+            return Response(
+                {"error": "이메일과 비밀번호를 모두 제공해야 합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = authenticate(email=email, password=password)
+
         if user is not None:
             serializer = UserSerializer(user)
-            # 받아온 유저 토큰 생성
             token = TokenObtainPairSerializer.get_token(user)
-            # settings -> restframe_work 부분에 timedelta로 유효기간 설정
             refresh_token = str(token)
             access_token = str(token.access_token)
-            # 유저 정보와 로그인, 토큰 값들 Response
+
             res = Response(
                 {
                     "user": serializer.data,
-                    "message": "login success",
+                    "message": "로그인 성공",
                     "token": {
                         "access": access_token,
                         "refresh": refresh_token,
@@ -114,9 +120,11 @@ class LoginView(APIView):
                 status=status.HTTP_200_OK,
             )
             return res
-        # 받아온 유저의 값이 없을 시
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "잘못된 이메일 또는 비밀번호입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class LogoutView(APIView):
@@ -250,8 +258,15 @@ class AddressUpdateView(APIView):
                 if serializer.is_valid():
                     serializer.save()
                     return Response(serializer.data)
+                else:
+                    return Response(
+                        serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                    )
             else:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+                return Response(
+                    {"error": "등록된 주소 정보가 없습니다."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 

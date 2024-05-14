@@ -103,7 +103,7 @@ class OrderGetListView(APIView):
                     restaurant_res = {
                         "restaurant_id": restaurant.id,
                         "restaurant_name": restaurant.name,
-                        "picture": restaurant.representative_menu_picture,
+                        "image": restaurant.representative_menu_image,
                         "menu_name": menu_res,
                     }
 
