@@ -1,5 +1,6 @@
 import re
 
+from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate
@@ -102,6 +103,13 @@ class LoginView(APIView):
 
         user = authenticate(email=email, password=password)
 
+        # user가 존재하지만 deleted_at 필드에 값이 설정되어 있는 경우
+        if user is not None and user.deleted_at is not None:
+            return Response(
+                {"error": "삭제된 사용자입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if user is not None:
             serializer = UserSerializer(user)
             token = TokenObtainPairSerializer.get_token(user)
@@ -125,7 +133,6 @@ class LoginView(APIView):
                 {"error": "잘못된 이메일 또는 비밀번호입니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
 
 class LogoutView(APIView):
     # Authorization의 토큰 값과 유저의 토큰 값이 일치하는지 확인
@@ -177,17 +184,17 @@ class DeleteView(APIView):
         try:
             # 현재 인증된 사용자 가져오기
             user = request.user
-            # 사용자 삭제
-            user.delete()
+            # 사용자 삭제 대신 deleted_at 필드 설정
+            user.deleted_at = timezone.now()
+            user.save()
             return Response(
-                {"message": "User data successfully deleted."},
+                {"message": "User data successfully soft deleted."},
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
             return Response(
                 {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
 
 class AddressView(APIView):
     """
