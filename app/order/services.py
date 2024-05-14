@@ -22,9 +22,9 @@ from common.utils.geo_utils import (
     check_coordinate_in_polygon,
     get_coordinates_distance_km,
 )
-from restaurant.models import Menu, Option_group_to_menu
+from order.models import Delivery_fee_info
 from pprint import pp
-from .serializers import CartMenuCheckSerializers
+from order.serializers import CartMenuCheckSerializers
 
 
 class OrderServiceUtils:
@@ -44,14 +44,29 @@ class OrderServiceUtils:
     def get_delivery_fee(self, coor, order_price):
         OKIVERY_COOR = (37.07967, 127.05227)
         distance = abs(get_coordinates_distance_km(coor, OKIVERY_COOR))
+        fees = Delivery_fee_info.objects.all()
+
+        class Fee:
+            def __init__(self, fee):
+                self.name = fee.name
+                self.fee = fee.delivery_fee
+                self.code = fee.code
+                self.status = fee.status
+
+        fees = {fee.code: Fee(fee) for fee in fees}
+
         delivery_fee = 0
         if order_price < 16900:
-            delivery_fee = 4400
+            delivery_fee = fees["DF1"].fee
 
         if distance >= 1.5:
             while distance >= 0:
-                delivery_fee += 500
+                delivery_fee += fees["DF2"].fee
                 distance -= 0.5
+        for i in range(3, 6):
+            fee = fees[f"DF{i}"]
+            if fee.status:
+                delivery_fee += fee.fee
         return delivery_fee
 
 
@@ -65,8 +80,8 @@ class CartCheckService(BasicServiceClass):
         multiple_menu_serializer = CartMenuCheckSerializers(data=self.request.data)
         multiple_menu_serializer.is_valid(raise_exception=True)
 
-        menu_data = multiple_menu_serializer.validated_data
-        result = {"menus": menu_data}
+        orders = multiple_menu_serializer.validated_data
+        result = {"orders": orders}
 
         coor = self.request.data.get("coordinate", None)
         if not coor:
@@ -91,12 +106,13 @@ class CartCheckService(BasicServiceClass):
     def set_price_data(self, data):
         osu = OrderServiceUtils()
         order_price = 0
-        for menu in data['menus']:
-            menu_price = 0
-            if menu['status']:
-                menu_price = osu.get_menu_price(menu)
-            menu['menu_total_price'] = menu_price
-            order_price += menu_price
+        for order in data["orders"]:
+            for menu in order["menus"]:
+                menu_price = 0
+                if menu["status"]:
+                    menu_price = osu.get_menu_price(menu)
+                menu["menu_total_price"] = menu_price
+                order_price += menu_price
 
         coor = self.request.data.get("coordinate", None)
         if coor:
