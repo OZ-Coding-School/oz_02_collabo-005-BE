@@ -70,7 +70,7 @@ class Restaurant(CommonModel):
 
 
 class Hashtag(CommonModel):
-    hashtag = models.CharField(max_length=20)
+    hashtag = models.CharField(max_length=50)
 
     def __str__(self):
         return self.hashtag
@@ -92,7 +92,7 @@ class RestaurantHashtag(CommonModel):
 
 
 class Category(CommonModel):
-    category = models.CharField(max_length=20)
+    category = models.CharField(max_length=50)
 
     def __str__(self):
         return self.category
@@ -148,7 +148,7 @@ class Option_group(CommonModel):
         (1, "Single"),
         (2, "Multiple"),
     )
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=50)
     mandatory = models.BooleanField(default=False)
     choice_mode = models.PositiveIntegerField(choices=STATUS_CHOICES, default=2)
     maximum = models.PositiveIntegerField(default=1)
@@ -165,7 +165,7 @@ class Option_group_to_menu(CommonModel):
 
 class Option(CommonModel):
     option_group = models.ForeignKey(Option_group, on_delete=models.CASCADE)
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=50)
     price = models.PositiveIntegerField(null=True, default=None)
 
     def __str__(self):
