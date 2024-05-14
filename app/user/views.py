@@ -107,7 +107,7 @@ class LoginView(APIView):
         if user is not None and user.deleted_at is not None:
             return Response(
                 {"error": "삭제된 사용자입니다."},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
 
         if user is not None:
