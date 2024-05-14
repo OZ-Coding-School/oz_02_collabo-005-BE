@@ -101,3 +101,56 @@ class OrderSerializer(serializers.ModelSerializer):
         order.save()
 
         return order
+
+
+from restaurant.models import Menu, Option, Option_group_to_menu
+
+
+class CartMenuCheckSerializers(serializers.Serializer):
+    menus = serializers.ListField(child=serializers.DictField())
+
+    def validate(self, data):
+        validated_data = []
+        for menu_data in data.get("menus", []):
+            menu_id = menu_data.get("id")
+            quantity = menu_data.get("quantity", 0)
+
+            # 1. 메뉴가 존재하는지 확인
+            try:
+                menu = Menu.objects.get(id=menu_id)
+            except Menu.DoesNotExist:
+                raise serializers.ValidationError(
+                    f"Menu with id {menu_id} does not exist"
+                )
+
+            # 2. 메뉴가 존재하면 해당 메뉴의 (id, status, price)를 가져옴
+            menu_info = {
+                "id": menu.id,
+                "status": menu.status,
+                "price": menu.price,
+                "quantity": quantity,
+                "options": [],
+            }
+
+            # 3. 각 옵션의 유효성을 확인하고, 연결되어 있는지 확인
+            options = menu_data.get("options", [])
+            for option_id in options:
+                try:
+                    option = Option.objects.get(id=option_id)
+                except Option.DoesNotExist:
+                    raise serializers.ValidationError(
+                        f"Option with id {option_id} does not exist"
+                    )
+
+                if not Option_group_to_menu.objects.filter(
+                    option_group_id=option.option_group_id, menu_id=menu_id
+                ).exists():
+                    raise serializers.ValidationError(
+                        f"Option with id {option_id} is not connected to the menu with id {menu_id}"
+                    )
+
+                menu_info["options"].append({"id": option.id, "price": option.price})
+
+            validated_data.append(menu_info)
+
+        return validated_data
