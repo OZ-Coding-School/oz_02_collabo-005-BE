@@ -107,7 +107,7 @@ class LoginView(APIView):
         if user is not None and user.deleted_at is not None:
             return Response(
                 {"error": "삭제된 사용자입니다."},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
 
         if user is not None:
@@ -133,6 +133,7 @@ class LoginView(APIView):
                 {"error": "잘못된 이메일 또는 비밀번호입니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
 
 class LogoutView(APIView):
     # Authorization의 토큰 값과 유저의 토큰 값이 일치하는지 확인
@@ -195,6 +196,7 @@ class DeleteView(APIView):
             return Response(
                 {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 class AddressView(APIView):
     """
