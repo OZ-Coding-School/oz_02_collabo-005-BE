@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -6,6 +7,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import *
+from .serializers import DummySerializer
 
 
 class RestaurantGetListView(APIView):
@@ -15,6 +17,9 @@ class RestaurantGetListView(APIView):
     각 다른 테이블에서 데이터를 가져온다(restaurant, hashtag, category)
     """
 
+    @extend_schema(
+        request=DummySerializer, responses={200: DummySerializer(many=False)}
+    )
     def get(self, request):
         # 토큰 인증
         JWT_authenticator = JWTAuthentication()
@@ -84,6 +89,23 @@ class RestaurantGetListView(APIView):
 
 
 class RestaurantGetDetailView(APIView):
+    """
+    레스토랑에 대한 메뉴, 대표사진, 설명 등 정보를 가져온다.
+    """
+
+    @extend_schema(
+        request=DummySerializer,
+        responses={200: DummySerializer(many=False)},
+        parameters=[
+            OpenApiParameter(
+                name="restaurantId",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description="레스토랑의 ID",
+            ),
+        ],
+    )
     def get(self, request):
         # 토큰 인증
         JWT_authenticator = JWTAuthentication()
@@ -174,6 +196,24 @@ class RestaurantGetDetailView(APIView):
 
 
 class MenuDetailView(APIView):
+    """
+    특정 메뉴에 대한 옵션과 가격 등 가져온다
+    """
+
+    @extend_schema(
+        request=DummySerializer,
+        responses={200: DummySerializer(many=False)},
+        parameters=[
+            OpenApiParameter(
+                name="menuId",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description="특정메뉴 ID",
+            ),
+        ],
+    )
+    
     def get(self, request):
         # 토큰 인증
         JWT_authenticator = JWTAuthentication()
@@ -205,7 +245,9 @@ class MenuDetailView(APIView):
                 for option_group in option_groups:
                     option_list = []
 
-                    options = Option.objects.filter(option_group=option_group).values('id', 'name', 'price')
+                    options = Option.objects.filter(option_group=option_group).values(
+                        "id", "name", "price"
+                    )
 
                     # menus에서 가져온 데이터를 하나씩 menu_list에 추가한다
                     for option in options:
@@ -241,77 +283,3 @@ class MenuDetailView(APIView):
             return Response(
                 {"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
             )
-
-
-class MenuStatusView(APIView):
-    def post(self, request):
-        menus_data = request.data.get("menus", [])
-
-        if not menus_data:
-            return Response(
-                {"message": "No menus data provided"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        response_data = []
-        total_price = 0
-        for menu_data in menus_data:
-            menu_id = menu_data.get("menu_id")
-            quantity = menu_data.get("quantity", 1)
-            options_data = menu_data.get("option_list", [])
-
-            # menu_id가 없을 때 출력되는 예외처리
-            try:
-                menu = Menu.objects.get(id=menu_id)
-            except ObjectDoesNotExist:
-                return Response(
-                    {"message": f"Menu with id {menu_id} does not exist"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-
-            menu_price = menu.price * quantity
-            option_price = 0
-            for option_group_data in options_data:
-                option_group_id = option_group_data.get("group_id")
-                option_ids = option_group_data.get("options", [])
-
-                # option_group_id가 존재하지 않으면 출력되는 예외처리
-                try:
-                    Option_group.objects.get(id=option_group_id)
-                except ObjectDoesNotExist:
-                    return Response(
-                        {
-                            "message": f"Option group with id {option_group_id} does not exist"
-                        },
-                        status=status.HTTP_404_NOT_FOUND,
-                    )
-
-                # quantity가 0값이면 출력되는 예외처리
-                if quantity < 1:
-                    return Response(
-                        {"message": "Quantity must be at least 1"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
-                # option_id가 없으면 message를 출력하는 예외처리
-                for option_id in option_ids:
-                    try:
-                        option = Option.objects.get(id=option_id)
-                    except ObjectDoesNotExist:
-                        return Response(
-                            {"message": f"Option with id {option_id} does not exist"},
-                            status=status.HTTP_404_NOT_FOUND,
-                        )
-                    option_price += option.price
-
-            price = (
-                menu_price + option_price * quantity
-            )  # 옵션 가격에 옵션 수량을 곱합니다.
-            menu_status = menu.status
-            total_price += price
-            response_data.append(
-                {"menu_id": menu_id, "menu_status": menu_status, "price": price}
-            )
-
-        res = {"menus": response_data, "total_price": total_price}
-        return Response(res, status=status.HTTP_200_OK)
