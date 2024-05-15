@@ -173,7 +173,7 @@ class RestaurantGetDetailView(APIView):
             )
 
 
-class MenuGetDetailView(APIView):
+class MenuDetailView(APIView):
     def get(self, request):
         # 토큰 인증
         JWT_authenticator = JWTAuthentication()
@@ -193,60 +193,44 @@ class MenuGetDetailView(APIView):
                     )
 
                 option_group_detail = []
-                # Restaurant_id 가 같은 Menu_group_id를 가져온다
                 option_group_ids = Option_group_to_menu.objects.filter(
                     menu=menu.id
                 ).values("option_group_id")
 
-                for option_group in option_group_ids:
+                option_groups = [
+                    obj.option_group
+                    for obj in Option_group_to_menu.objects.filter(menu=menu)
+                ]
+
+                for option_group in option_groups:
                     option_list = []
 
-                    option_group_id = option_group["option_group_id"]
+                    options = Option.objects.filter(option_group=option_group).values('id', 'name', 'price')
 
-                    # Menu_group에서 description의 값들을 가져온다.
-                    option_group_value = (
-                        Option_group.objects.filter(id=option_group_id)
-                        .values(
-                            "id", "name", "mandatory", "choice_mode", "maximum", "minimum"
-                        )
-                        .first()
-                    )
-
-                    # description이라는 컬럼이 있는 데이터들의 값만 가져온다
-                    if option_group_value:
-                        options = Option.objects.filter(
-                            option_group=option_group_id
-                        ).values("id", "name", "price")
-
-                        # menus에서 가져온 데이터를 하나씩 menu_list에 추가한다
-                        for option in options:
-                            option_list.append(option)
-                        # Menu_group에 description 데이터를 가져오고 Menu에서 가져온 각 데이터들을
-                        # menu_group_data에 튜플 형태로 넣어준다.
-                        option_group_data = {
-                            "option_group_id": option_group_value["id"],
-                            "option_name": option_group_value["name"],
-                            "mandatory": option_group_value["mandatory"],
-                            "choice_mode": option_group_value["choice_mode"],
-                            "options": option_list,
-                        }
-                        if option_group_value["choice_mode"] == 2:
-                            option_group_data["maximum"] = option_group_value.get(
-                                "maximum", None
-                            )
-                            option_group_data["minimum"] = option_group_value.get(
-                                "minimum", None
-                            )
-
-                        option_group_detail.append(option_group_data)
-
-                    res = {
-                        "id": menu.id,
-                        "name": menu.name,
-                        "image": menu.picture,
-                        "description": menu.description,
-                        "option_group_list": option_group_detail,
+                    # menus에서 가져온 데이터를 하나씩 menu_list에 추가한다
+                    for option in options:
+                        option_list.append(option)
+                    # Menu_group에 description 데이터를 가져오고 Menu에서 가져온 각 데이터들을
+                    # menu_group_data에 튜플 형태로 넣어준다.
+                    option_group_data = {
+                        "option_group_id": option_group.id,
+                        "option_name": option_group.name,
+                        "mandatory": option_group.mandatory,
+                        "choice_mode": option_group.choice_mode,
+                        "options": option_list,
+                        "maximum": option_group.maximum,
+                        "minumum": option_group.minimum,
                     }
+
+                    option_group_detail.append(option_group_data)
+
+                res = {
+                    "id": menu.id,
+                    "name": menu.name,
+                    "image": menu.picture,
+                    "description": menu.description,
+                    "option_group_list": option_group_detail,
+                }
                 return Response(res, status=status.HTTP_200_OK)
             else:
                 return Response(
@@ -296,7 +280,9 @@ class MenuStatusView(APIView):
                     Option_group.objects.get(id=option_group_id)
                 except ObjectDoesNotExist:
                     return Response(
-                        {"message": f"Option group with id {option_group_id} does not exist"},
+                        {
+                            "message": f"Option group with id {option_group_id} does not exist"
+                        },
                         status=status.HTTP_404_NOT_FOUND,
                     )
 
@@ -306,7 +292,7 @@ class MenuStatusView(APIView):
                         {"message": "Quantity must be at least 1"},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
-                
+
                 # option_id가 없으면 message를 출력하는 예외처리
                 for option_id in option_ids:
                     try:
@@ -318,7 +304,9 @@ class MenuStatusView(APIView):
                         )
                     option_price += option.price
 
-            price = menu_price + option_price * quantity  # 옵션 가격에 옵션 수량을 곱합니다.
+            price = (
+                menu_price + option_price * quantity
+            )  # 옵션 가격에 옵션 수량을 곱합니다.
             menu_status = menu.status
             total_price += price
             response_data.append(
