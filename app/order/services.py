@@ -37,7 +37,7 @@ class OrderServiceUtils:
     def get_order_price(self, menus):
         result = 0
         for menu in menus:
-            if menu["status"]:
+            if menu["status"] == 1:
                 result += self.get_menu_price(menu)
         return sum((self.get_menu_price(menu) for menu in menus), 0)
 
