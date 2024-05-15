@@ -125,3 +125,24 @@ class CartCheckService(BasicServiceClass):
         data["delivery_fee"] = delivery_fee
         data["total_price"] = order_price + delivery_fee
         return data
+
+
+class SaveOrderService(BasicServiceClass):
+    def __init__(self, request):
+        super().__init__(request)
+        # validated_data = self.is_valid()
+        self.response_data = self.is_valid()
+        # print(validated_data)
+
+    def is_valid(self):
+        validated_data = CartCheckService(self.request).get_response_data()
+        # 요청사항, 주소 추가
+        additional_keys = ["store_request", "rider_request", "address"]
+        required = ["address"]
+        for key in additional_keys:
+            value = self.request.data.get(key, None)
+            if key in required and not value:
+                raise CustomBadRequestError(f"{key} is required")
+            validated_data[key] = value
+
+        return validated_data
