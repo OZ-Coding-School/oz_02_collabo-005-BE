@@ -1,5 +1,6 @@
 import re
 
+from drf_spectacular.utils import extend_schema
 from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -25,6 +26,12 @@ def check_email_format(email):
 
 
 class UserView(APIView):
+    """
+    POST - 유저를 생성하는 뷰
+    GET - 생성된 유저를 토큰에 따라서 조회하는 뷰
+    """
+
+    @extend_schema(request=UserSerializer, responses={200: UserSerializer})
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -38,6 +45,7 @@ class UserView(APIView):
             return res
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(responses={200: UserSerializer})
     def get(self, request):
         JWT_authenticator = JWTAuthentication()
         is_validated_token = JWT_authenticator.authenticate(request)
@@ -63,6 +71,7 @@ class EmailCheckView(APIView):
     이메일의 중복여부 체크 View
     """
 
+    @extend_schema(request=DummySerializer, responses={200: DummySerializer(many=False)})
     def get(self, request):
         email = request.GET.get("email", None)
         if email:
@@ -90,6 +99,7 @@ class LoginView(APIView):
     회원가입 된 계정으로 로그인하는 View
     """
 
+    @extend_schema(request=UserLoginSerializer, responses={200: UserLoginSerializer(many=False)})
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -134,11 +144,13 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+
 class LogoutView(APIView):
     # Authorization의 토큰 값과 유저의 토큰 값이 일치하는지 확인
     authentication_classes = [JWTAuthentication]  # simple-jwt JWTAuthentication 사용
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=DummySerializer, responses={200: DummySerializer(many=False)})
     def delete(self, request):
         # 쿠키에 저장된 토큰 삭제 => 로그아웃 처리
         response = Response(
@@ -150,7 +162,11 @@ class LogoutView(APIView):
 
 
 class UpdateView(UpdateAPIView):
-    serializer_class = UserSerializer
+    """
+    유저 정보를 업데이트 하는 View
+    current_password와 new_password가 모두 비워져 있을땐 다른 정보를 업데이트
+    """
+    serializer_class = UserUpdateSerializer
     queryset = User.objects.all()
     authentication_classes = [JWTAuthentication]  # simple-jwt JWTAuthentication 사용
     permission_classes = [IsAuthenticated]  # 인증된 사용자만 업데이트 가능
@@ -177,9 +193,14 @@ class UpdateView(UpdateAPIView):
 
 
 class DeleteView(APIView):
+    """
+    유저 데이터 삭제
+    delete_at 데이터베이스에 추가
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=DummySerializer, responses={200: DummySerializer(many=False)})
     def post(self, request):
         try:
             # 현재 인증된 사용자 가져오기
@@ -195,15 +216,18 @@ class DeleteView(APIView):
             return Response(
                 {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
+        
 class AddressView(APIView):
     """
     주소 생성 및 조회 API
     """
-
+    serializer_class = AddressSerializer 
+    
+    @extend_schema(request=AddressSerializer, responses={200: AddressSerializer(many=False)})
     def post(self, request):
         """
-        토큰 검증 이후 주소 생성 API
+        POST - 토큰 검증 이후 주소 생성 API
+        GET - 토큰 검증 이후 주소 조회
         """
         JWT_authenticator = JWTAuthentication()
         is_validated_token = JWT_authenticator.authenticate(request)
@@ -251,7 +275,10 @@ class AddressView(APIView):
 
 
 class AddressUpdateView(APIView):
-
+    """
+    주소 업데이트 뷰
+    """
+    @extend_schema(request=AddressSerializer, responses={200: AddressSerializer(many=False)})
     def post(self, request):
         JWT_authenticator = JWTAuthentication()
         is_validated_token = JWT_authenticator.authenticate(request)
@@ -284,6 +311,7 @@ from common.utils.geo_utils import check_coordinate_in_polygon
 class AddressCoordinateWithinPolygonView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=DummySerializer, responses={200: DummySerializer(many=False)})
     def get(self, request):
         lat = request.GET.get("lat", None)
         lng = request.GET.get("lng", None)
