@@ -6,14 +6,19 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 
-from .models import Order
+from .models import Order, Order_detail, Order_option
 from .serializers import *
 
 from common.utils.geo_utils import (
     check_coordinate_in_polygon,
     get_coordinates_distance_km,
 )
+from common.utils.response_formatter import JSONDataFormatter
+from common.errors import CustomError
+
+from order.services import CartCheckService
 
 
 class OrderCreateView(APIView):
@@ -65,63 +70,48 @@ class OrderCreateView(APIView):
         return Response(res, stat)
 
 
-class OrderGetListView(APIView):
+class OrderListView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        JWT_authenticator = JWTAuthentication()
-        is_validated_token = JWT_authenticator.authenticate(request)
+        formatter = JSONDataFormatter()
 
-        if is_validated_token:
-            user = is_validated_token[0]
-            orders = Order.objects.filter(user=user.id)
-            response_data = []
-            for order in orders:
-                detail_menu_list = []
-                order_detail_ids = Order_detail.objects.filter(order=order.id)
+        user_id = request.user.id
+        orders = Order.objects.filter(user=user_id)
+        result = []
+        for order in orders:
+            details = Order_detail.objects.filter(order=order.id)
+            details_result = {}
+            for detail in details:
+                menu = detail.menu
+                detail_price = menu.price
 
-                for order_detail in order_detail_ids:
-                    menu_id = order_detail.menu_id
-                    menu = Menu.objects.get(id=menu_id)
-                    restaurant = menu.restaurant
-                    total_price = menu.price * order_detail.quantity
-                    options_list = []
+                options = Order_option.objects.filter(order_detail=detail.id)
+                for option in options:
+                    detail_price += option.option_price
 
-                    order_options = Order_option.objects.filter(
-                        order_detail=order_detail
-                    )
-                    for order_option in order_options:
-                        options_res = {"option_name": order_option.option_name}
-                        options_list.append(options_res)
-                        total_price += order_option.option_price
-
-                    menu_res = {
-                        "name": menu.name,
-                        "quantity": order_detail.quantity,
-                        "option": options_list,
-                        "total_price": total_price,
+                restaurant = menu.restaurant
+                if restaurant.id in details_result:
+                    details_result[restaurant.id]["quantity"] += detail.quantity
+                    details_result[restaurant.id]["total_price"] += detail_price
+                else:
+                    details_result[restaurant.id] = {
+                        "menu_name": menu.name,
+                        "quantity": detail.quantity,
+                        "total_price": detail_price,
+                        "logo": restaurant.logo_image_url,
                     }
 
-                    restaurant_res = {
-                        "restaurant_id": restaurant.id,
-                        "restaurant_name": restaurant.name,
-                        "image": restaurant.representative_menu_image,
-                        "menu_name": menu_res,
-                    }
-
-                    detail_menu_list.append(restaurant_res)
-
-                res = {
+            result.append(
+                {
                     "id": order.id,
-                    "order_time": order.order_time,
-                    "order_status": order.order_status,
-                    "menus": detail_menu_list,
+                    "date": order.created_at.date(),
+                    "details": details_result,
                 }
-                response_data.append(res)
-            return Response(response_data)
+            )
 
-
-from .services import CartCheckService
-from common.utils.response_formatter import JSONDataFormatter
-from common.errors import CustomError
+        formatter.add_response_data({"data": result})
+        return Response(formatter.get_response_data(), status=formatter.status)
 
 
 class CartCheckView(APIView):
