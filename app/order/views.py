@@ -96,6 +96,7 @@ class OrderListView(APIView):
                     details_result[restaurant.id]["total_price"] += detail_price
                 else:
                     details_result[restaurant.id] = {
+                        "restaurant_name": restaurant.name,
                         "menu_name": menu.name,
                         "quantity": detail.quantity,
                         "total_price": detail_price,
