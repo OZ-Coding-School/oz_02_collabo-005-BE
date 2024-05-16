@@ -14,7 +14,7 @@ urlpatterns = [
     ### order ###
     # order/list/
     path("order/list/", ov.OrderTestView.as_view(), name="admin-order-list"),
-
+    path("order/approve/", ov.OrderApprove.as_view(), name= "admin-order-approve"),
 
     # 테스트용 API
     # api/v1/admin/test/
