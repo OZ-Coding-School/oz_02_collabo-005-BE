@@ -18,68 +18,26 @@ from common.utils.geo_utils import (
 from common.utils.response_formatter import JSONDataFormatter
 from common.errors import CustomError
 
-from order.services import CartCheckService, SaveOrderService
+from order.services import CartCheckService, SaveOrderService, PaymentService
 
 from rest_framework.serializers import ValidationError
 from django.db.utils import IntegrityError
 
 class OrderCreateView(APIView):
     def post(self, request):
-        # JWT_authenticator = JWTAuthentication()
-        # is_validated_token = JWT_authenticator.authenticate(request)
-        # if is_validated_token:
-        #     coor = request.data.get("coordinate", None)
-        #     if not coor:
-        #         return Response(
-        #             {"code": 400, "message": "No coordinate"},
-        #             stat=status.HTTP_400_BAD_REQUEST,
-        #         )
-
-        #     if not check_coordinate_in_polygon(coor):
-        #         res = {"code": 400, "message": "Coordinate is invalid"}
-        #         stat = status.HTTP_400_BAD_REQUEST
-        #     else:
-        #         user = is_validated_token[0]
-        #         request.data["user_id"] = user.id
-        #         request.data.pop("coordinate")
-        #         serializer = OrderSerializer(data=request.data)
-        #         if serializer.is_valid():
-        #             a = serializer.create(request.data)
-        #             res = {"order": a.id, "message": "Success Created Order"}
-
-        #             distance = abs(
-        #                 get_coordinates_distance_km(coor, (37.07967, 127.05227))
-        #             )
-        #             print(distance, a.total_price)
-        #             delivery_fee = 0
-        #             if a.total_price < 16900:
-        #                 delivery_fee = 4400
-
-        #             if distance >= 1.5:
-        #                 while distance > 0:
-        #                     delivery_fee += 500
-        #                     distance -= 0.5
-        #             res.update({"delivery_fee": delivery_fee})
-        #             stat = status.HTTP_201_CREATED
-        #             print(res)
-        #         else:
-        #             res = {"error": serializer.errors}
-        #             stat = status.HTTP_400_BAD_REQUEST
-        # else:
-        #     res = {"error": "Invalid token"}
-        #     stat = status.HTTP_401_UNAUTHORIZED
-
         # Formatter 생성
-        formatter = JSONDataFormatter()
+        formatter = JSONDataFormatter(201)
 
         # 유저가 보낸 카드정보 체크 (?) - 일단 보류
 
         # 유저가 보낸 데이터 검증(주문데이터가 정확한지)
         try:
-            print(1)
-            pay_status = SaveOrderService(request).get_response_data()
-            formatter.add_response_data({"data": pay_status})
-            print(2)
+            order, payment = SaveOrderService(request).get_response_data()
+            PaymentService(request, order, payment)
+            response_data = {"code": payment.status}
+            if payment.status == "PMS002":
+                response_data['fail'] = payment.failure_reason
+            formatter.add_response_data({"data": response_data})
         except CustomError as e:
             formatter.set_status_and_message(e.status, e.message)
         except ValidationError as e:
