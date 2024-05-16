@@ -16,7 +16,7 @@ class Order(CommonModel):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order_status = models.PositiveIntegerField(choices=STATUS_CHOICES)
-    cooking_time = models.DateTimeField(auto_now_add=True, null=True)
+    cooking_time = models.DateTimeField(null=True)
     delivery_address = models.CharField(max_length=255)
     dispatch_status = models.IntegerField(null=True, default=None)
     store_request = models.TextField(null=True, default=None)
