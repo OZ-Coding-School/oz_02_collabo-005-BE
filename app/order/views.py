@@ -23,6 +23,7 @@ from order.services import CartCheckService, SaveOrderService, PaymentService
 from rest_framework.serializers import ValidationError
 from django.db.utils import IntegrityError
 
+
 class OrderCreateView(APIView):
     def post(self, request):
         # Formatter 생성
@@ -36,7 +37,7 @@ class OrderCreateView(APIView):
             PaymentService(request, order, payment)
             response_data = {"code": payment.status}
             if payment.status == "PMS002":
-                response_data['fail'] = payment.failure_reason
+                response_data["fail"] = payment.failure_reason
             formatter.add_response_data({"data": response_data})
         except CustomError as e:
             formatter.set_status_and_message(e.status, e.message)
@@ -80,18 +81,25 @@ class OrderListView(APIView):
                     detail_price += option.option_price
 
                 restaurant = menu.restaurant
+                total_price = detail_price * detail.quantity
                 if restaurant.id in details_result:
                     details_result[restaurant.id]["quantity"] += detail.quantity
-                    details_result[restaurant.id]["total_price"] += detail_price
+                    details_result[restaurant.id]["total_price"] += total_price
                 else:
                     details_result[restaurant.id] = {
                         "restaurant_name": restaurant.name,
                         "menu_name": menu.name,
                         "quantity": detail.quantity,
-                        "total_price": detail_price,
+                        "total_price": total_price,
                         "logo": restaurant.logo_image_url,
                     }
 
+            print(
+                restaurant.name,
+                menu.name,
+                detail.quantity,
+                details_result[restaurant.id]["total_price"],
+            )
             result.append(
                 {
                     "id": order.id,
