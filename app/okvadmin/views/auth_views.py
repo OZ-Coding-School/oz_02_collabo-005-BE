@@ -10,9 +10,10 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import permission_classes
+from drf_spectacular.utils import extend_schema
 
 from user.models import User
-
+from ..serializers.auth_serializers import AdminLoginValidSerializer
 
 from pprint import pp
 
@@ -31,6 +32,10 @@ from common.utils.response_formatter import JSONDataFormatter
 
 
 class AdminLoginView(APIView):
+
+    @extend_schema(
+        request=AdminLoginValidSerializer, responses={200: AdminLoginValidSerializer(many=False)}
+    )
     def post(self, request):
         res_formatter = JSONDataFormatter(200)
         response = Response()
