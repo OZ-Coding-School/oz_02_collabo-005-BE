@@ -90,29 +90,25 @@ class Order_option(CommonModel):
 class Payment(CommonModel):
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    payment_method = models.CharField(max_length=255)
-    payment_time = models.DateTimeField(auto_now_add=True)
+    method = models.CharField(max_length=255)
+    status = models.CharField(max_length=6, default="PMS000")
+    failure_reason = models.CharField(max_length=6, null=True)
+    order_price = models.PositiveIntegerField(null=True, default=None)
+    delivery_fee = models.PositiveIntegerField(null=True, default=None)
     total_price = models.PositiveIntegerField(null=True, default=None)
-    coupon = models.PositiveIntegerField(null=True, default=None)
-    delivery_pay = models.PositiveIntegerField(null=True, default=None)
-    final_price = models.PositiveIntegerField(null=True, default=None)
 
     def clean(self):
         # total_price 필드에 대한 음수 값 확인
         if self.total_price < 0:
             raise ValidationError("Total price cannot be negative.")
 
-        # coupon 필드에 대한 음수 값 확인
-        if self.coupon < 0:
-            raise ValidationError("Coupon amount cannot be negative.")
+        # delivery_fee 필드에 대한 음수 값 확인
+        if self.delivery_fee < 0:
+            raise ValidationError("Delivery fee amount cannot be negative.")
 
-        # delivery_pay 필드에 대한 음수 값 확인
-        if self.delivery_pay < 0:
-            raise ValidationError("Delivery pay amount cannot be negative.")
-
-        # final_price 필드에 대한 음수 값 확인
-        if self.final_price < 0:
-            raise ValidationError("Final price cannot be negative.")
+        # order_price 필드에 대한 음수 값 확인
+        if self.order_price < 0:
+            raise ValidationError("Order price cannot be negative.")
 
     def __str__(self):
         return f"Payment - Order: {self.order}, Method: {self.payment_method}, Time: {self.payment_time}"
@@ -137,11 +133,12 @@ class Delivery(CommonModel):
     def __str__(self):
         return f"Delivery - Order: {self.order}, Delivery Man: {self.delivery_man}, Estimated Time: {self.estimated_time}, Completion Time: {self.completion_time}"
 
+
 class Delivery_fee_info(CommonModel):
     name = models.CharField(max_length=20)
     delivery_fee = models.PositiveIntegerField(null=True, default=None)
     code = models.CharField(max_length=20)
     status = models.BooleanField(default=0)
-    
+
     def __str__(self):
         return self.name
