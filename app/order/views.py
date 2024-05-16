@@ -20,6 +20,8 @@ from common.errors import CustomError
 
 from order.services import CartCheckService, SaveOrderService
 
+from rest_framework.serializers import ValidationError
+from django.db.utils import IntegrityError
 
 class OrderCreateView(APIView):
     def post(self, request):
@@ -80,9 +82,12 @@ class OrderCreateView(APIView):
             print(2)
         except CustomError as e:
             formatter.set_status_and_message(e.status, e.message)
+        except ValidationError as e:
+            formatter.set_status_and_message(e.status_code, str(e))
+        except IntegrityError as e:
+            formatter.set_status_and_message(500, str(e))
         except Exception as e:
-            print(e)
-            formatter.message = str(e)
+            formatter.set_status_and_message(500, str(e))
 
         # 검증된 데이터에 추가적인 정보(request, address 등)을 붙여서 order 생성 (결제대기 상태)
 

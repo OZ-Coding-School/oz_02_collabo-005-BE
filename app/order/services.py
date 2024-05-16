@@ -127,18 +127,27 @@ class CartCheckService(BasicServiceClass):
         return data
 
 
+from django.db import transaction
+from order.models import Order, Order_detail, Order_option
+from user.models import User
+from restaurant.models import Menu, Option
+
+
 class SaveOrderService(BasicServiceClass):
     def __init__(self, request):
         super().__init__(request)
-        # validated_data = self.is_valid()
-        self.response_data = self.is_valid()
+        validated_data = self.is_valid()
+        # self.response_data = validated_data
+        self.response_data = self.save(validated_data).pk
         # print(validated_data)
 
     def is_valid(self):
         validated_data = CartCheckService(self.request).get_response_data()
+        validated_data["details"] = validated_data.pop("orders")
+        validated_data["user"] = User.objects.get(id=self.request.user.id)
         # 요청사항, 주소 추가
-        additional_keys = ["store_request", "rider_request", "address"]
-        required = ["address"]
+        additional_keys = ["store_request", "rider_request", "delivery_address"]
+        required = ["delivery_address"]
         for key in additional_keys:
             value = self.request.data.get(key, None)
             if key in required and not value:
@@ -146,3 +155,37 @@ class SaveOrderService(BasicServiceClass):
             validated_data[key] = value
 
         return validated_data
+
+    def save(self, data):
+        with transaction.atomic():
+            order_keys = [
+                "delivery_address",
+                "user",
+                "store_request",
+                "rider_request",
+                "order_price",
+                "delivery_fee",
+                "total_price",
+            ]
+            order_data = {key: data[key] for key in order_keys}
+            order_obj = Order(order_status=1, **order_data)
+            order_obj.save()
+            for detail_data in data["details"]:
+                menus_data = detail_data["menus"]
+                for menu_data in menus_data:
+                    menu_obj = Menu.objects.get(id=menu_data["id"])
+                    detail_obj = Order_detail(
+                        order=order_obj, menu=menu_obj, quantity=menu_data["quantity"]
+                    )
+                    detail_obj.save()
+                    for option_data in menu_data["options"]:
+                        option_obj = Option.objects.get(id=option_data["id"])
+                        option_group_name = option_obj.option_group.name
+                        order_option_obj = Order_option(
+                            order_detail=detail_obj,
+                            option_price=option_obj.price,
+                            option_name=option_obj.name,
+                            option_group_name=option_group_name,
+                        )
+                        order_option_obj.save()
+            return order_obj
