@@ -20,8 +20,6 @@ def get_coordinates_distance_km(coor1, coor2):
     )
 
     distance = 2 * radius * math.asin(square_root)
-    print(distance)
-
     return distance
 
 
