@@ -269,6 +269,7 @@ class MenuDetailView(APIView):
                 res = {
                     "id": menu.id,
                     "name": menu.name,
+                    "price": menu.price,
                     "image": menu.picture,
                     "description": menu.description,
                     "option_group_list": option_group_detail,
