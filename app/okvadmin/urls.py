@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import auth_views as av, test_views as tv, restaurant_views as rv
+from .views import auth_views as av, test_views as tv, restaurant_views as rv, order_views as ov 
 
 urlpatterns = [
     ### base: api/v1/admin/ ###
@@ -11,6 +11,9 @@ urlpatterns = [
     # restaurant/list
     path("restaurant/list/", rv.RestaurantListView.as_view(), name="admin-restaurant-list"),
     
+    ### order ###
+    # order/list/
+    path("order/list/", ov.OrderTestView.as_view(), name="admin-order-list"),
 
 
     # 테스트용 API
