@@ -14,7 +14,7 @@ class JSONDataFormatter:
 
     def get_response_data(self):
         data = {
-            "code": self.status,
+            "status": self.status,
             "message": self.message,
         }
         for additional_data in self.additional_datas:
