@@ -7,7 +7,7 @@ class DummySerializer(serializers.Serializer):
 class DeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = Delivery
-        fields = ["delivery_man_id", "estimated_time"]
+        fields = ["is_self_delivery"]
 
 
 class OrderApproveSerializer(serializers.ModelSerializer):
@@ -15,3 +15,8 @@ class OrderApproveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ["id", "cooking_time", "order_status", "delivery"]
+
+class OrderCancleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ["id", "cancle_reason"]

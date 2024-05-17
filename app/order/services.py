@@ -136,7 +136,7 @@ from restaurant.models import Menu, Option
 
 class SaveOrderService(BasicServiceClass):
     def __init__(self, request):
-        super().__init__()
+        super().__init__(request)
         validated_data = self.is_valid()
         self.response_data = self.save(validated_data)
 
