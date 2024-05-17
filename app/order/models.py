@@ -125,10 +125,10 @@ class Delivery_man(CommonModel):
 
 class Delivery(CommonModel):
 
-    delivery_man = models.ForeignKey(Delivery_man, on_delete=models.CASCADE)
+    delivery_man = models.ForeignKey(Delivery_man, on_delete=models.CASCADE, null=True, blank=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    estimated_time = models.DateTimeField()
-    completion_time = models.DateTimeField()
+    estimated_time = models.DateTimeField(null=True, default=None)
+    completion_time = models.DateTimeField(null=True, default=None)
 
     def __str__(self):
         return f"Delivery - Order: {self.order}, Delivery Man: {self.delivery_man}, Estimated Time: {self.estimated_time}, Completion Time: {self.completion_time}"
