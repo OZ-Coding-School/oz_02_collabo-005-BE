@@ -92,7 +92,7 @@ class Payment(CommonModel):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     method = models.CharField(max_length=255)
     status = models.CharField(max_length=6, default="PMS000")
-    failure_reason = models.CharField(max_length=6, null=True)
+    cancle_reason = models.CharField(max_length=6, null=True)
     order_price = models.PositiveIntegerField(null=True, default=None)
     delivery_fee = models.PositiveIntegerField(null=True, default=None)
     total_price = models.PositiveIntegerField(null=True, default=None)
@@ -129,6 +129,9 @@ class Delivery(CommonModel):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     estimated_time = models.DateTimeField(null=True, default=None)
     completion_time = models.DateTimeField(null=True, default=None)
+    is_self_delivery = models.BooleanField(default=0)
+    delivery_status = models.PositiveIntegerField(null=True, default=None)
+    cancle_time = models.DateTimeField(null=True)
 
     def __str__(self):
         return f"Delivery - Order: {self.order}, Delivery Man: {self.delivery_man}, Estimated Time: {self.estimated_time}, Completion Time: {self.completion_time}"
