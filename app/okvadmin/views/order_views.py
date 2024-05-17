@@ -140,18 +140,32 @@ class OrderCancleView(APIView):
             order.save()
 
             # Delivery 객체 조회 및 상태 및 취소 시간 업데이트
-            delivery = Delivery.objects.get(order=order)
-            delivery.delivery_status = 23  # 배달 상태를 취소(23)로 변경
-            delivery.cancle_time = timezone.now()  # 취소 시간 업데이트
-            delivery.save()
+            try:
+                delivery = Delivery.objects.get(order=order)
+                delivery.delivery_status = 23  # 배달 상태를 취소(23)로 변경
+                delivery.cancle_time = timezone.now()  # 취소 시간 업데이트
+                delivery.save()
+            except Delivery.DoesNotExist:
+                # Delivery 객체가 없으면 처리하지 않고 넘어감
+                pass
 
             # Payment 객체 조회 및 상태 및 취소 이유 업데이트
-            payment = Payment.objects.get(order=order)
-            payment.status = "PMS003"  # 결제 상태를 취소 상태로 변경
-            payment.cancle_reason = "PMF600"  # 취소 이유 업데이트
-            payment.save()
+            try:
+                payment = Payment.objects.get(order=order)
+                payment.status = "PMS003"  # 결제 상태를 취소 상태로 변경
+                payment.cancle_reason = "PMF600"  # 취소 이유 업데이트
+                payment.save()
+            except Payment.DoesNotExist:
+                return Response(
+                    {"message": "Payment not found"}, status=status.HTTP_404_NOT_FOUND
+                )
 
             return Response(
                 {"message": "Order canceled successfully"},
                 status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"message": "Authentication failed"},
+                status=status.HTTP_401_UNAUTHORIZED
             )
