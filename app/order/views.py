@@ -7,7 +7,12 @@ from .serializers import *
 from common.utils.response_formatter import JSONDataFormatter
 from common.errors import CustomError
 
-from order.services import CartCheckService, SaveOrderService, PaymentService
+from order.services import (
+    CartCheckService,
+    SaveOrderService,
+    OrderDetailService,
+    PaymentService,
+)
 
 from rest_framework.serializers import ValidationError
 from django.db.utils import IntegrityError
@@ -89,14 +94,35 @@ class OrderListView(APIView):
 
 class OrderDetailView(APIView):
     def get(self, request):
-        pass
+        formatter = JSONDataFormatter()
+        order_id = request.GET.get("id", None)
+
+        if not order_id:
+            return Response("Order id is required", status=400)
+
+        try:
+            formatter.add_response_data({"data": OrderDetailService(order_id).get_response_data()})
+            formatter.message = "Check success"
+        except CustomError as e:
+            formatter.set_status_and_message(e.status, e.message)
+        except ValidationError as e:
+            formatter.set_status_and_message(e.status_code, str(e))
+        except Order.DoesNotExist as e:
+            formatter.set_status_and_message(400, f"ID {order_id} is not exist")
+        except IntegrityError as e:
+            formatter.set_status_and_message(500, str(e))
+        except Exception as e:
+            print(type(e))
+            formatter.set_status_and_message(500, str(e))
+
+        return Response(formatter.get_response_data(), formatter.status)
 
 
 class CartCheckView(APIView):
     def post(self, request):
         formatter = JSONDataFormatter()
         try:
-            ccs = CartCheckService(request)
+            ccs = CartCheckService(request.data)
             formatter.add_response_data({"data": ccs.get_response_data()})
             formatter.message = "Request complete"
         except CustomError as e:
