@@ -71,19 +71,20 @@ class OrderServiceUtils:
 
 
 class CartCheckService(BasicServiceClass):
-    def __init__(self, request):
-        super().__init__(request)
+    def __init__(self, request_data):
+        super().__init__()
+        self.request_data = request_data
         validated_data = self.is_valid()
         self.response_data = self.set_price_data(validated_data)
 
     def is_valid(self):
-        multiple_menu_serializer = CartMenuCheckSerializers(data=self.request.data)
+        multiple_menu_serializer = CartMenuCheckSerializers(data=self.request_data)
         multiple_menu_serializer.is_valid(raise_exception=True)
 
         orders = multiple_menu_serializer.validated_data
         result = {"orders": orders}
 
-        coor = self.request.data.get("coordinate", None)
+        coor = self.request_data.get("coordinate", None)
         if not coor:
             result["coordinate"] = False
         else:
@@ -114,10 +115,10 @@ class CartCheckService(BasicServiceClass):
                 menu["menu_total_price"] = menu_price
                 order_price += menu_price
 
-        coor = self.request.data.get("coordinate", None)
+        coor = self.request_data.get("coordinate", None)
         if coor:
             delivery_fee = osu.get_delivery_fee(
-                self.request.data["coordinate"], order_price
+                self.request_data["coordinate"], order_price
             )
         else:
             delivery_fee = 0
@@ -135,12 +136,12 @@ from restaurant.models import Menu, Option
 
 class SaveOrderService(BasicServiceClass):
     def __init__(self, request):
-        super().__init__(request)
+        super().__init__()
         validated_data = self.is_valid()
         self.response_data = self.save(validated_data)
 
     def is_valid(self):
-        validated_data = CartCheckService(self.request).get_response_data()
+        validated_data = CartCheckService(self.request.data).get_response_data()
         validated_data["details"] = validated_data.pop("orders")
         validated_data["user"] = User.objects.get(id=self.request.user.id)
         # 요청사항, 주소 추가
@@ -202,7 +203,58 @@ class SaveOrderService(BasicServiceClass):
             return [order_obj, payment_obj]
 
 
-import random
+class OrderDetailService(BasicServiceClass):
+    def __init__(self, order_id):
+        super().__init__()
+        self.response_data = self.is_valid(order_id)
+
+    def is_valid(self, id):
+        osu = OrderServiceUtils()
+        order = Order.objects.get(id=id)
+        details = Order_detail.objects.filter(order=order)
+        restaurants = {}
+        for detail in details:
+            menu = detail.menu
+            restaurant_id = menu.restaurant.id
+            if restaurant_id not in restaurants:
+                restaurants[restaurant_id] = {
+                    "restaurant": {"id": restaurant_id, "name": menu.restaurant.name},
+                    "menus": [],
+                }
+            detail_data = {
+                "id": menu.id,
+                "name": menu.name,
+                "price": menu.price,
+                "options": [],
+                "quantity": detail.quantity,
+            }
+            options = Order_option.objects.filter(order_detail=detail)
+            for option in options:
+                detail_data["options"].append(
+                    {
+                        "id": option.id,
+                        "name": option.option_name,
+                        "price": option.option_price,
+                    }
+                )
+            detail_data["menu_total_price"] = osu.get_menu_price(detail_data)
+            restaurants[restaurant_id]["menus"].append(detail_data)
+        orders = []
+        for value in restaurants.values():
+            orders.append(value)
+
+        return {
+            "address": order.delivery_address,
+            "orders": orders,
+            "order_price": order.order_price,
+            "delivery_fee": order.delivery_fee,
+            "total_price": order.total_price,
+            "store_request": order.store_request,
+            "rider_request": order.rider_request,
+        }
+
+
+import random, time
 
 
 class PaymentService(BasicServiceClass):
@@ -247,8 +299,6 @@ class PaymentService(BasicServiceClass):
             print("save success")
 
             # 뭔가 바로 처리되면 재미없을 거 같아서 3초 기다리게 해봤음
-            import time
-
             cnt = 0
             while cnt < 3:
                 print("주문 처리 중")

@@ -1,24 +1,18 @@
-import re
-
-from django.http import JsonResponse
-from django.shortcuts import render
-from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated
 
 from .models import Order, Order_detail, Order_option
 from .serializers import *
 
-from common.utils.geo_utils import (
-    check_coordinate_in_polygon,
-    get_coordinates_distance_km,
-)
 from common.utils.response_formatter import JSONDataFormatter
 from common.errors import CustomError
 
-from order.services import CartCheckService, SaveOrderService, PaymentService
+from order.services import (
+    CartCheckService,
+    SaveOrderService,
+    OrderDetailService,
+    PaymentService,
+)
 
 from rest_framework.serializers import ValidationError
 from django.db.utils import IntegrityError
@@ -29,9 +23,6 @@ class OrderCreateView(APIView):
         # Formatter 생성
         formatter = JSONDataFormatter(201)
 
-        # 유저가 보낸 카드정보 체크 (?) - 일단 보류
-
-        # 유저가 보낸 데이터 검증(주문데이터가 정확한지)
         try:
             order, payment = SaveOrderService(request).get_response_data()
             PaymentService(request, order, payment)
@@ -48,21 +39,10 @@ class OrderCreateView(APIView):
         except Exception as e:
             formatter.set_status_and_message(500, str(e))
 
-        # 검증된 데이터에 추가적인 정보(request, address 등)을 붙여서 order 생성 (결제대기 상태)
-
-        # order에 등록되면 결제 진행
-        # 결제가 구현이 되어있지 않으므로 결제는 확률적으로 실패
-
-        # 결제 여부에 따라 order에 status 변경 + 취소시 취소사유(cancle_reason) 추가
-
-        # 성공, 실패 여부 return
-
         return Response(formatter.get_response_data(), formatter.status)
 
 
 class OrderListView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request):
         formatter = JSONDataFormatter()
 
@@ -112,11 +92,37 @@ class OrderListView(APIView):
         return Response(formatter.get_response_data(), status=formatter.status)
 
 
+class OrderDetailView(APIView):
+    def get(self, request):
+        formatter = JSONDataFormatter()
+        order_id = request.GET.get("id", None)
+
+        if not order_id:
+            return Response("Order id is required", status=400)
+
+        try:
+            formatter.add_response_data({"data": OrderDetailService(order_id).get_response_data()})
+            formatter.message = "Check success"
+        except CustomError as e:
+            formatter.set_status_and_message(e.status, e.message)
+        except ValidationError as e:
+            formatter.set_status_and_message(e.status_code, str(e))
+        except Order.DoesNotExist as e:
+            formatter.set_status_and_message(400, f"ID {order_id} is not exist")
+        except IntegrityError as e:
+            formatter.set_status_and_message(500, str(e))
+        except Exception as e:
+            print(type(e))
+            formatter.set_status_and_message(500, str(e))
+
+        return Response(formatter.get_response_data(), formatter.status)
+
+
 class CartCheckView(APIView):
     def post(self, request):
         formatter = JSONDataFormatter()
         try:
-            ccs = CartCheckService(request)
+            ccs = CartCheckService(request.data)
             formatter.add_response_data({"data": ccs.get_response_data()})
             formatter.message = "Request complete"
         except CustomError as e:
