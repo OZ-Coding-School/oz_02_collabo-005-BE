@@ -279,7 +279,7 @@ class PaymentService(BasicServiceClass):
         """
         현재는 결제가 구현되지 않았으므로 70% 확률로 결제 성공
         """
-        return random.random() < 7
+        return random.random() < 0.7
 
     def get_failure_code(self):
         """
@@ -320,5 +320,5 @@ class PaymentService(BasicServiceClass):
 
             if is_success:
                 print("주문 대기 상태")
-                order.order_status = 20
+                order.order_status = StatusCode.ORDER_PENDING
                 order.save()
