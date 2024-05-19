@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 from abc import ABCMeta, abstractmethod
+from common.constants import StatusCode
 
 
 class BasicServiceClass(metaclass=ABCMeta):
@@ -154,8 +155,12 @@ class SaveOrderService(BasicServiceClass):
             validated_data[key] = value
 
         payment_method = self.request.data["payment_method"]
-        # PMM101 = 온라인 카드 | PMM901 = 현장 카드 | PMM902 = 현장 현금
-        if payment_method not in ["PMM101", "PMM901", "PMM902"]:
+        if payment_method not in (
+            StatusCode.PAYMENT_ONLINE_CARD,
+            StatusCode.PAYMENT_ONLINE_CASH,
+            StatusCode.PAYMENT_OFFLINE_CARD,
+            StatusCode.PAYMENT_OFFLINE_CASH,
+        ):
             raise CustomBadRequestError("Payment method code is invalid")
 
         return validated_data
@@ -245,6 +250,7 @@ class OrderDetailService(BasicServiceClass):
 
         return {
             "address": order.delivery_address,
+            "order_status": order.order_status,
             "orders": orders,
             "order_price": order.order_price,
             "delivery_fee": order.delivery_fee,
@@ -264,35 +270,42 @@ class PaymentService(BasicServiceClass):
         self.save(order, payment)
 
     def is_valid(self):
-        # 결제 정보(카드, 현장 (카드, 현금) - front 에서 카드만 할듯
+        # 결제 정보(온라인(카드, 현금), 현장 (카드, 현금) - front 에서 카드만 할듯
         payment_method = self.request.data.get("payment_method", None)
         if not payment_method:
             raise CustomBadRequestError("Payment method is required")
 
-        # PMM101 = 온라인 카드 | PMM901 = 현장 카드 | PMM902 = 현장 현금
-        if payment_method not in ["PMM101", "PMM901", "PMM902"]:
-            raise CustomBadRequestError("Payment method code is invalid")
-
     def pay(self):
+        """
+        현재는 결제가 구현되지 않았으므로 70% 확률로 결제 성공
+        """
         return random.random() < 7
 
     def get_failure_code(self):
-        # 400: 잘못된 카드정보
-        # 410: 잔액 부족
-        # 500: 서버 내부 오류
-        # 502: 통신 오류
-        code = ["PFM400", "PMF410", "PMF500", "PMF502"]
+        """
+        실패 사유 코드를 랜덤하게 리턴
+        """
+        code = [
+            StatusCode.PAYMENT_INVALID_CARD_INFO,
+            StatusCode.PAYMENT_INSUFFICIENT_BALANCE,
+            StatusCode.PAYMENT_SERVER_INTERNAL_ERROR,
+            StatusCode.PAYMENT_COMMUNICATION_ERROR,
+        ]
         return random.choice(code)
 
     def save(self, order, payment):
-        # PMS000: 결제대기 | 001: 결제완료 | 002: 결제실패 | 003: 결제취소
+        """
+        결제 상태와 실패시 사유를 저장
+        """
         is_success = self.pay()
+        Payment.cancle_reason
         if is_success:
-            payment.status = "PMS001"
-            order.order_status = "11"
+            payment.status = StatusCode.PAYMENT_SUCCESSFUL
+            order.order_status = StatusCode.PAYMENT_SUCCESSFUL
         else:
-            payment.status = "PMS002"
-            order.order_status = "12"
+            payment.status = StatusCode.PAYMENT_FAILED
+            payment.cancle_reason = self.get_failure_code()
+            order.order_status = StatusCode.PAYMENT_FAILED
         with transaction.atomic():
             order.save()
             payment.save()

@@ -17,6 +17,7 @@ from order.services import (
 from rest_framework.serializers import ValidationError
 from django.db.utils import IntegrityError
 
+from common.constants import StatusCode
 
 class OrderCreateView(APIView):
     def post(self, request):
@@ -26,9 +27,9 @@ class OrderCreateView(APIView):
         try:
             order, payment = SaveOrderService(request).get_response_data()
             PaymentService(request, order, payment)
-            response_data = {"code": payment.status}
-            if payment.status == "PMS002":
-                response_data["fail"] = payment.failure_reason
+            response_data = {"code": order.order_status}
+            if payment.status == StatusCode.PAYMENT_FAILED:
+                response_data["fail"] = payment.cancle_reason
             formatter.add_response_data({"data": response_data})
         except CustomError as e:
             formatter.set_status_and_message(e.status, e.message)
@@ -74,16 +75,11 @@ class OrderListView(APIView):
                         "logo": restaurant.logo_image_url,
                     }
 
-            print(
-                restaurant.name,
-                menu.name,
-                detail.quantity,
-                details_result[restaurant.id]["total_price"],
-            )
             result.append(
                 {
                     "id": order.id,
                     "date": order.created_at.date(),
+                    "order_status": order.order_status,
                     "details": details_result,
                 }
             )
@@ -101,7 +97,9 @@ class OrderDetailView(APIView):
             return Response("Order id is required", status=400)
 
         try:
-            formatter.add_response_data({"data": OrderDetailService(order_id).get_response_data()})
+            formatter.add_response_data(
+                {"data": OrderDetailService(order_id).get_response_data()}
+            )
             formatter.message = "Check success"
         except CustomError as e:
             formatter.set_status_and_message(e.status, e.message)
