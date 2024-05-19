@@ -45,9 +45,10 @@ from django.utils import timezone
 class Restaurant(CommonModel):
 
     STATUS_CHOICES = (
-        (1, "Open"),
-        (2, "Closed"),
-        (3, "Under Maintenance"),
+        (200000, "Shut Down"),
+        (200001, "Open"),
+        (200002, "Closed"),
+        (200003, "Under Maintenance"),
     )
 
     name = models.CharField(max_length=50)
@@ -60,7 +61,7 @@ class Restaurant(CommonModel):
     minimum_order_amount = models.PositiveIntegerField()
     opening_time = models.TimeField()
     closing_time = models.TimeField()
-    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=2)
+    status = models.PositiveIntegerField(choices=STATUS_CHOICES, default=200002)
 
     def __str__(self):
         return f"({self.id}){self.name}"
@@ -124,9 +125,10 @@ class Menu_group(CommonModel):
 class Menu(CommonModel):
 
     STATUS_CHOICES = (
-        (1, "Open"),
-        (2, "Sold Out"),
-        (3, "Hidden"),
+        (210001, "판매중"),
+        (210002, "품절"),
+        (210003, "숨김"),
+        (210999, "변경 또는 삭제"),
     )
 
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
@@ -136,7 +138,7 @@ class Menu(CommonModel):
     price = models.PositiveIntegerField(null=True, default=None)
     picture = models.URLField(null=True, default=None)
     description = models.CharField(max_length=255, null=True, default=None)
-    status = models.PositiveIntegerField(choices=STATUS_CHOICES)
+    status = models.PositiveIntegerField(choices=STATUS_CHOICES, default=210001)
 
     def __str__(self):
         return self.name
