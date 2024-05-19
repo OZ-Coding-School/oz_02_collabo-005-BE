@@ -155,7 +155,6 @@ class SaveOrderService(BasicServiceClass):
             validated_data[key] = value
 
         payment_method = self.request.data["payment_method"]
-        print(payment_method, StatusCode.PAYMENT_ONLINE_CARD, type(payment_method), type(StatusCode.PAYMENT_ONLINE_CARD))
         if payment_method not in (
             StatusCode.PAYMENT_ONLINE_CARD,
             StatusCode.PAYMENT_ONLINE_CASH,
