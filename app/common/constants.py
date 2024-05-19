@@ -1,7 +1,4 @@
-from enum import Enum, unique
-
-@unique
-class StatusCode(Enum):
+class StatusCode():
     ### Restaurant(200) ###
     RESTAURANT_SHUT_DOWN = 200000               # 폐업
     RESTAURANT_OPEN = 200001                    # 영업중
