@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ObjectDoesNotExist
 
+from common.constants import Environments, StatusCode
 from .models import *
 from .serializers import DummySerializer
 
@@ -26,9 +27,8 @@ class RestaurantGetListView(APIView):
         is_validated_token = JWT_authenticator.authenticate(request)
         if is_validated_token:
 
-            restaurant_detail = request.GET.get("id", None)
             # Restaurant 테이블에서 id, name, picture값을 가져온다
-            restaurants = Restaurant.objects.all().values(
+            restaurants = Restaurant.objects.exclude(status=StatusCode.RESTAURANT_SHUT_DOWN).values(
                 "id",
                 "name",
                 "description",
@@ -75,7 +75,8 @@ class RestaurantGetListView(APIView):
                 res = {
                     "id": restaurant["id"],
                     "name": restaurant["name"],
-                    "image": restaurant["representative_menu_image"],
+                    "image": Environments.OKIVERY_BUCKET_URL
+                    + restaurant["representative_menu_image"],
                     "hashtag": hashtag_list,
                     "category": category_list,
                     "notice": restaurant["notice"],
@@ -146,7 +147,7 @@ class RestaurantGetDetailView(APIView):
                         menu_group_name = menu_group_value["name"]
 
                         # 메뉴 정보 가져오기
-                        menus = Menu.objects.filter(menu_group=menu_group_id).values(
+                        menus = Menu.objects.filter(menu_group=menu_group_id, status__in=[StatusCode.MENU_OPTION_AVAILABLE, StatusCode.MENU_OPTION_SOLD_OUT]).values(
                             "id",
                             "picture",
                             "name",
@@ -157,8 +158,12 @@ class RestaurantGetDetailView(APIView):
                         )
 
                         for menu in menus:
+                            if menu["picture"]:
+                                menu["picture"] = (
+                                    Environments.OKIVERY_BUCKET_URL + menu["picture"]
+                                )
                             menu_list.append(menu)
-
+                                
                         # 메뉴 그룹 데이터 정의 (메뉴 루프 밖에서)
                         menu_group_data = {
                             "name": menu_group_name,
@@ -172,9 +177,10 @@ class RestaurantGetDetailView(APIView):
                 res = {
                     "id": restaurant.id,
                     "name": restaurant.name,
-                    "logo": restaurant.logo_image_url,
+                    "logo": Environments.OKIVERY_BUCKET_URL + restaurant.logo_image_url,
                     "notice": restaurant.notice,
-                    "image": restaurant.representative_menu_image,
+                    "image": Environments.OKIVERY_BUCKET_URL
+                    + restaurant.representative_menu_image,
                     "description": restaurant.description,
                     "minimum_order_amount": restaurant.minimum_order_amount,
                     "opening_time": restaurant.opening_time,
@@ -213,7 +219,6 @@ class MenuDetailView(APIView):
             ),
         ],
     )
-    
     def get(self, request):
         # 토큰 인증
         JWT_authenticator = JWTAuthentication()
@@ -270,7 +275,7 @@ class MenuDetailView(APIView):
                     "id": menu.id,
                     "name": menu.name,
                     "price": menu.price,
-                    "image": menu.picture,
+                    "image": Environments.OKIVERY_BUCKET_URL + menu.picture,
                     "description": menu.description,
                     "option_group_list": option_group_detail,
                 }
