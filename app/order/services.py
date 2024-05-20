@@ -257,6 +257,7 @@ class OrderDetailService(BasicServiceClass):
             "total_price": order.total_price,
             "store_request": order.store_request,
             "rider_request": order.rider_request,
+            "payment_method": Payment.objects.get(order=order).method
         }
 
 
