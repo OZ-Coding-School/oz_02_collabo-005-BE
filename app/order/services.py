@@ -172,14 +172,12 @@ class SaveOrderService(BasicServiceClass):
             restaurant = detail["restaurant"]
             # 가게 상태 점검
             if restaurant["status"] != StatusCode.RESTAURANT_OPEN:
-                print('here')
                 status = StatusCode.ORDER_FAILED
                 cancle_reason = restaurant["status"]
                 message = f"Restaurant {restaurant["id"]} is not open"
             # 메뉴 상태 점검
             if not status:
                 for menu in detail["menus"]:
-                    print(menu)
                     if menu["status"] != StatusCode.MENU_OPTION_AVAILABLE:
                         status = StatusCode.ORDER_FAILED
                         cancle_reason = menu["status"]
