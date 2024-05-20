@@ -167,13 +167,14 @@ class SaveOrderService(BasicServiceClass):
             raise CustomBadRequestError("Payment method code is invalid")
         
         # 가게 및 메뉴가 판매가능인지 판단
+        status = None
         for detail in validated_data["details"]:
             restaurant = detail["restaurant"]
             # 가게 상태 점검
             if restaurant["status"] != StatusCode.RESTAURANT_OPEN:
                 status = StatusCode.ORDER_FAILED
                 cancle_reason = restaurant["status"]
-                message = f"Menu {restaurant["id"]} is not open"
+                message = f"Restaurant {restaurant["id"]} is not open"
             # 메뉴 상태 점검
             if not status:
                 for menu in detail["menus"]:
@@ -181,6 +182,9 @@ class SaveOrderService(BasicServiceClass):
                         status = StatusCode.ORDER_FAILED
                         cancle_reason = menu["status"]
                         message = f"Menu {menu["id"]} is not available for sale"
+                        break
+            if status:
+                break
 
         if status:
             order_data = {
