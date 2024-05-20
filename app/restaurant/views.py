@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ObjectDoesNotExist
 
-from common.constants import Environments
+from common.constants import Environments, StatusCode
 from .models import *
 from .serializers import DummySerializer
 
@@ -27,7 +27,6 @@ class RestaurantGetListView(APIView):
         is_validated_token = JWT_authenticator.authenticate(request)
         if is_validated_token:
 
-            restaurant_detail = request.GET.get("id", None)
             # Restaurant 테이블에서 id, name, picture값을 가져온다
             restaurants = Restaurant.objects.all().values(
                 "id",
@@ -44,6 +43,9 @@ class RestaurantGetListView(APIView):
 
             for restaurant in restaurants:
                 # 해시태그와 카테고리는 한 번 돌 때마다 새로운 리스트를 만듭니다.
+                if restaurant["status"] == StatusCode.RESTAURANT_SHUT_DOWN:
+                    continue
+
                 hashtag_list = []
                 category_list = []
 
@@ -159,10 +161,13 @@ class RestaurantGetDetailView(APIView):
                         )
 
                         for menu in menus:
-                            if menu["picture"]:
-                                menu["picture"] = Environments.OKIVERY_BUCKET_URL + menu["picture"]
-                            menu_list.append(menu)
-
+                            if menu["status"] in [StatusCode.MENU_OPTION_AVAILABLE, StatusCode.MENU_OPTION_SOLD_OUT]:
+                                if menu["picture"]:
+                                    menu["picture"] = (
+                                        Environments.OKIVERY_BUCKET_URL + menu["picture"]
+                                    )
+                                menu_list.append(menu)
+                                
                         # 메뉴 그룹 데이터 정의 (메뉴 루프 밖에서)
                         menu_group_data = {
                             "name": menu_group_name,
