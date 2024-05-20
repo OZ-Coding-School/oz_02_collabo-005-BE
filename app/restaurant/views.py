@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ObjectDoesNotExist
 
+from common.constants import Environments
 from .models import *
 from .serializers import DummySerializer
 
@@ -75,7 +76,8 @@ class RestaurantGetListView(APIView):
                 res = {
                     "id": restaurant["id"],
                     "name": restaurant["name"],
-                    "image": restaurant["representative_menu_image"],
+                    "image": Environments.OKIVERY_BUCKET_URL
+                    + restaurant["representative_menu_image"],
                     "hashtag": hashtag_list,
                     "category": category_list,
                     "notice": restaurant["notice"],
@@ -157,6 +159,8 @@ class RestaurantGetDetailView(APIView):
                         )
 
                         for menu in menus:
+                            if menu["picture"]:
+                                menu["picture"] = Environments.OKIVERY_BUCKET_URL + menu["picture"]
                             menu_list.append(menu)
 
                         # 메뉴 그룹 데이터 정의 (메뉴 루프 밖에서)
@@ -172,9 +176,10 @@ class RestaurantGetDetailView(APIView):
                 res = {
                     "id": restaurant.id,
                     "name": restaurant.name,
-                    "logo": restaurant.logo_image_url,
+                    "logo": Environments.OKIVERY_BUCKET_URL + restaurant.logo_image_url,
                     "notice": restaurant.notice,
-                    "image": restaurant.representative_menu_image,
+                    "image": Environments.OKIVERY_BUCKET_URL
+                    + restaurant.representative_menu_image,
                     "description": restaurant.description,
                     "minimum_order_amount": restaurant.minimum_order_amount,
                     "opening_time": restaurant.opening_time,
@@ -213,7 +218,6 @@ class MenuDetailView(APIView):
             ),
         ],
     )
-    
     def get(self, request):
         # 토큰 인증
         JWT_authenticator = JWTAuthentication()
@@ -270,7 +274,7 @@ class MenuDetailView(APIView):
                     "id": menu.id,
                     "name": menu.name,
                     "price": menu.price,
-                    "image": menu.picture,
+                    "image": Environments.OKIVERY_BUCKET_URL + menu.picture,
                     "description": menu.description,
                     "option_group_list": option_group_detail,
                 }
