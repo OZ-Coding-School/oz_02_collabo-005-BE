@@ -297,6 +297,7 @@ class OrderDetailService(BasicServiceClass):
             "total_price": order.total_price,
             "store_request": order.store_request,
             "rider_request": order.rider_request,
+            "payment_method": Payment.objects.get(order=order).method
         }
 
 
@@ -337,15 +338,19 @@ class PaymentService(BasicServiceClass):
         """
         결제 상태와 실패시 사유를 저장
         """
-        is_success = self.pay()
-        Payment.cancle_reason
-        if is_success:
-            payment.status = StatusCode.PAYMENT_SUCCESSFUL
-            order.order_status = StatusCode.PAYMENT_SUCCESSFUL
+        if payment.method in (StatusCode.PAYMENT_OFFLINE_CARD, StatusCode.PAYMENT_OFFLINE_CASH):
+            payment.status = StatusCode.PAYMENT_OFFLINE
+            order.order_status = StatusCode.PAYMENT_OFFLINE
+            is_success = True
         else:
-            payment.status = StatusCode.PAYMENT_FAILED
-            payment.cancle_reason = self.get_failure_code()
-            order.order_status = StatusCode.PAYMENT_FAILED
+            is_success = self.pay()
+            if is_success:
+                payment.status = StatusCode.PAYMENT_SUCCESSFUL
+                order.order_status = StatusCode.PAYMENT_SUCCESSFUL
+            else:
+                payment.status = StatusCode.PAYMENT_FAILED
+                payment.cancle_reason = self.get_failure_code()
+                order.order_status = StatusCode.PAYMENT_FAILED
         with transaction.atomic():
             order.save()
             payment.save()
