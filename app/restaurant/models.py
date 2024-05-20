@@ -1,6 +1,8 @@
 from django.db import models
 from common.models import CommonModel
 
+from common.constants import StatusCode
+
 
 class RestaurantManager(models.Manager):
     """레스토랑 모델 관리자로, 레스토랑 생성을 처리합니다."""
@@ -44,11 +46,11 @@ from django.utils import timezone
 
 class Restaurant(CommonModel):
 
-    STATUS_CHOICES = (
-        (200000, "Shut Down"),
-        (200001, "Open"),
-        (200002, "Closed"),
-        (200003, "Under Maintenance"),
+    RESTAURANT_STATUS = (
+        (StatusCode.RESTAURANT_SHUT_DOWN, "Shut down"),
+        (StatusCode.RESTAURANT_OPEN, "Open"),
+        (StatusCode.RESTAURANT_PREPARE, "Prepare"),
+        (StatusCode.RESTAURANT_CLOSE, "Close"),
     )
 
     name = models.CharField(max_length=50)
@@ -61,7 +63,7 @@ class Restaurant(CommonModel):
     minimum_order_amount = models.PositiveIntegerField()
     opening_time = models.TimeField()
     closing_time = models.TimeField()
-    status = models.PositiveIntegerField(choices=STATUS_CHOICES, default=200002)
+    status = models.IntegerField(choices=RESTAURANT_STATUS, default=StatusCode.RESTAURANT_CLOSE)
 
     def __str__(self):
         return f"({self.id}){self.name}"
@@ -124,11 +126,11 @@ class Menu_group(CommonModel):
 
 class Menu(CommonModel):
 
-    STATUS_CHOICES = (
-        (210001, "판매중"),
-        (210002, "품절"),
-        (210003, "숨김"),
-        (210999, "변경 또는 삭제"),
+    MENU_STATUS = (
+        (StatusCode.MENU_OPTION_AVAILABLE, "Available"),
+        (StatusCode.MENU_OPTION_SOLD_OUT, "Sold out"),
+        (StatusCode.MENU_OPTION_HIDDEN, "Hedden"),
+        (StatusCode.MENU_OPTION_MODIFIED_OR_DELETED, "Modified or Deleted"),
     )
 
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
@@ -137,8 +139,8 @@ class Menu(CommonModel):
     name = models.CharField(max_length=50)
     price = models.PositiveIntegerField(null=True, default=None)
     picture = models.URLField(null=True, default=None)
-    description = models.CharField(max_length=255, null=True, default=None)
-    status = models.PositiveIntegerField(choices=STATUS_CHOICES, default=210001)
+    description = models.TextField(null=True, default=None)
+    status = models.PositiveIntegerField(choices=MENU_STATUS)
 
     def __str__(self):
         return self.name
