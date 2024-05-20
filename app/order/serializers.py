@@ -118,14 +118,17 @@ class CartMenuCheckSerializers(serializers.Serializer):
                 serializers.ValidationError(f"Restaurant id is required")
             try:
                 restaurant = Restaurant.objects.get(id=restaurant_id)
-                order_data['restaurant'] = {
+                order_data["restaurant"] = {
                     "id": restaurant_id,
-                    "name": restaurant.name
+                    "name": restaurant.name,
+                    "status": restaurant.status,
                 }
             except Restaurant.DoesNotExist:
-                serializers.ValidationError(f"Restaurant with id {menu_id} does not exist")
+                serializers.ValidationError(
+                    f"Restaurant with id {menu_id} does not exist"
+                )
             menus = order.get("menus", [])
-            order_data['menus'] = []
+            order_data["menus"] = []
             for menu_data in menus:
                 menu_id = menu_data.get("id")
                 quantity = menu_data.get("quantity", 0)
@@ -172,7 +175,7 @@ class CartMenuCheckSerializers(serializers.Serializer):
                     menu_info["options"].append(
                         {"id": option.id, "name": option.name, "price": option.price}
                     )
-                order_data['menus'].append(menu_info)
+                order_data["menus"].append(menu_info)
 
             validated_data.append(order_data)
 

@@ -5,7 +5,7 @@ from .models import Order, Order_detail, Order_option
 from .serializers import *
 
 from common.utils.response_formatter import JSONDataFormatter
-from common.errors import CustomError
+from common.errors import CustomBadRequestError, CustomNegativeResponseWithData
 
 from order.services import (
     CartCheckService,
@@ -32,8 +32,11 @@ class OrderCreateView(APIView):
             if payment.status == StatusCode.PAYMENT_FAILED:
                 response_data["fail"] = payment.cancle_reason
             formatter.add_response_data({"data": response_data})
-        except CustomError as e:
+        except CustomBadRequestError as e:
             formatter.set_status_and_message(e.status, e.message)
+        except CustomNegativeResponseWithData as e:
+            formatter.set_status_and_message(e.status, e.message)
+            formatter.add_response_data({"error": e.data})
         except ValidationError as e:
             formatter.set_status_and_message(e.status_code, str(e))
         except IntegrityError as e:
@@ -106,7 +109,7 @@ class OrderDetailView(APIView):
                 {"data": OrderDetailService(order_id).get_response_data()}
             )
             formatter.message = "Check success"
-        except CustomError as e:
+        except CustomBadRequestError as e:
             formatter.set_status_and_message(e.status, e.message)
         except ValidationError as e:
             formatter.set_status_and_message(e.status_code, str(e))
@@ -128,7 +131,7 @@ class CartCheckView(APIView):
             ccs = CartCheckService(request.data)
             formatter.add_response_data({"data": ccs.get_response_data()})
             formatter.message = "Request complete"
-        except CustomError as e:
+        except CustomBadRequestError as e:
             formatter.set_status_and_message(e.status, e.message)
 
         return Response(formatter.get_response_data(), status=formatter.status)
