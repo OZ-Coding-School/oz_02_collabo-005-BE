@@ -18,7 +18,7 @@ class BasicServiceClass(metaclass=ABCMeta):
         pass
 
 
-from common.errors import CustomBadRequestError
+from common.errors import CustomBadRequestError, CustomNegativeResponseWithData
 from common.utils.geo_utils import (
     check_coordinate_in_polygon,
     get_coordinates_distance_km,
@@ -59,18 +59,15 @@ class OrderServiceUtils:
         delivery_fee = 0
         if order_price < 16900:
             delivery_fee = fees["DF1"].fee
-        print(1, delivery_fee)
 
         if distance >= 1.5:
             while distance >= 0:
                 delivery_fee += fees["DF2"].fee
                 distance -= 0.5
-        print(2, delivery_fee)
         for i in range(3, 6):
             fee = fees[f"DF{i}"]
             if fee.status:
                 delivery_fee += fee.fee
-        print(3, delivery_fee)
         return delivery_fee
 
 
@@ -146,6 +143,23 @@ class SaveOrderService(BasicServiceClass):
 
     def is_valid(self):
         validated_data = CartCheckService(self.request.data).get_response_data()
+        # 가게 및 메뉴가 판매가능인지 판단
+        for detail in validated_data["orders"]:
+            restaurant = detail["restaurant"]
+            # 가게 상태 점검
+            if restaurant["status"] != StatusCode.RESTAURANT_OPEN:
+                raise CustomNegativeResponseWithData(f"Restaurant {restaurant["id"]} is not open", {
+                    "code": StatusCode.ORDER_REJECTED,
+                    "reason": restaurant["status"]
+                })
+            # 메뉴 상태 점검
+            for menu in detail["menus"]:
+                if menu["status"] != StatusCode.MENU_OPTION_AVAILABLE:
+                    raise CustomNegativeResponseWithData(f"Menu {menu["id"]} is not available", {
+                    "code": StatusCode.ORDER_REJECTED,
+                    "reason": menu["status"]
+                })
+
         validated_data["details"] = validated_data.pop("orders")
         validated_data["user"] = User.objects.get(id=self.request.user.id)
         # 요청사항, 주소 추가
@@ -180,7 +194,7 @@ class SaveOrderService(BasicServiceClass):
                 "total_price",
             ]
             order_data = {key: data[key] for key in order_keys}
-            order_obj = Order(order_status=10, **order_data)
+            order_obj = Order(order_status=StatusCode.PAYMENT_PENDING, **order_data)
             order_obj.save()
             for detail_data in data["details"]:
                 menus_data = detail_data["menus"]
