@@ -18,7 +18,6 @@ class Order(CommonModel):
     order_status = models.PositiveIntegerField(choices=STATUS_CHOICES)
     cooking_time = models.DateTimeField(null=True)
     delivery_address = models.CharField(max_length=255)
-    dispatch_status = models.IntegerField(null=True, default=None)
     store_request = models.TextField(null=True, default=None)
     rider_request = models.TextField(null=True, default=None)
     total_price = models.PositiveIntegerField(null=True, default=None)
@@ -38,7 +37,6 @@ class Order(CommonModel):
         delivery_address,
         total_price,
         order_status=0,
-        dispatch_status=None,
         store_request=None,
         rider_request=None,
         cancel_reason=None,
@@ -51,7 +49,6 @@ class Order(CommonModel):
             user=user,
             order_status=order_status,
             delivery_address=delivery_address,
-            dispatch_status=dispatch_status,
             store_request=store_request,
             rider_request=rider_request,
             total_price=total_price,
@@ -91,8 +88,8 @@ class Payment(CommonModel):
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     method = models.CharField(max_length=255)
-    status = models.CharField(max_length=6, default="PMS000")
-    cancle_reason = models.CharField(max_length=6, null=True)
+    status = models.PositiveIntegerField(default=310000)
+    cancle_reason = models.PositiveIntegerField(null=True)
     order_price = models.PositiveIntegerField(null=True, default=None)
     delivery_fee = models.PositiveIntegerField(null=True, default=None)
     total_price = models.PositiveIntegerField(null=True, default=None)
@@ -125,7 +122,9 @@ class Delivery_man(CommonModel):
 
 class Delivery(CommonModel):
 
-    delivery_man = models.ForeignKey(Delivery_man, on_delete=models.CASCADE, null=True, blank=True)
+    delivery_man = models.ForeignKey(
+        Delivery_man, on_delete=models.CASCADE, null=True, blank=True
+    )
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     estimated_time = models.DateTimeField(null=True, default=None)
     completion_time = models.DateTimeField(null=True, default=None)
