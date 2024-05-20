@@ -59,15 +59,18 @@ class OrderServiceUtils:
         delivery_fee = 0
         if order_price < 16900:
             delivery_fee = fees["DF1"].fee
+        print(1, delivery_fee)
 
         if distance >= 1.5:
             while distance >= 0:
                 delivery_fee += fees["DF2"].fee
                 distance -= 0.5
+        print(2, delivery_fee)
         for i in range(3, 6):
             fee = fees[f"DF{i}"]
             if fee.status:
                 delivery_fee += fee.fee
+        print(3, delivery_fee)
         return delivery_fee
 
 
@@ -119,7 +122,7 @@ class CartCheckService(BasicServiceClass):
         coor = self.request_data.get("coordinate", None)
         if coor:
             delivery_fee = osu.get_delivery_fee(
-                self.request_data["coordinate"], order_price
+                coor, order_price
             )
         else:
             delivery_fee = 0
@@ -257,7 +260,6 @@ class OrderDetailService(BasicServiceClass):
             "total_price": order.total_price,
             "store_request": order.store_request,
             "rider_request": order.rider_request,
-            "payment_method": Payment.objects.get(order=order).method
         }
 
 
