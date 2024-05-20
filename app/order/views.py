@@ -17,7 +17,8 @@ from order.services import (
 from rest_framework.serializers import ValidationError
 from django.db.utils import IntegrityError
 
-from common.constants import StatusCode
+from common.constants import StatusCode, Environments
+
 
 class OrderCreateView(APIView):
     def post(self, request):
@@ -72,7 +73,11 @@ class OrderListView(APIView):
                         "menu_name": menu.name,
                         "quantity": detail.quantity,
                         "total_price": total_price,
-                        "logo": restaurant.logo_image_url,
+                        "logo": (
+                            Environments.OKIVERY_BUCKET_URL + restaurant.logo_image_url
+                            if restaurant.logo_image_url
+                            else None
+                        ),
                     }
 
             result.append(
