@@ -19,6 +19,7 @@ services:
       - DB_PORT=${DB_PORT}
       - SECRET_KEY=${DJANGO_SECRET_KEY}
       - ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+      - OKIVERY_BUCKET_URL=${OKIVERY_BUCKET_URL}
     depends_on:
       - db
 
