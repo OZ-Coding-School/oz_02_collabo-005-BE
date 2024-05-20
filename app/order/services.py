@@ -143,22 +143,8 @@ class SaveOrderService(BasicServiceClass):
 
     def is_valid(self):
         validated_data = CartCheckService(self.request.data).get_response_data()
-        # 가게 및 메뉴가 판매가능인지 판단
-        for detail in validated_data["orders"]:
-            restaurant = detail["restaurant"]
-            # 가게 상태 점검
-            if restaurant["status"] != StatusCode.RESTAURANT_OPEN:
-                raise CustomNegativeResponseWithData(f"Restaurant {restaurant["id"]} is not open", {
-                    "code": StatusCode.ORDER_REJECTED,
-                    "reason": restaurant["status"]
-                })
-            # 메뉴 상태 점검
-            for menu in detail["menus"]:
-                if menu["status"] != StatusCode.MENU_OPTION_AVAILABLE:
-                    raise CustomNegativeResponseWithData(f"Menu {menu["id"]} is not available", {
-                    "code": StatusCode.ORDER_REJECTED,
-                    "reason": menu["status"]
-                })
+        
+            
 
         validated_data["details"] = validated_data.pop("orders")
         validated_data["user"] = User.objects.get(id=self.request.user.id)
@@ -179,6 +165,39 @@ class SaveOrderService(BasicServiceClass):
             StatusCode.PAYMENT_OFFLINE_CASH,
         ):
             raise CustomBadRequestError("Payment method code is invalid")
+        
+        # 가게 및 메뉴가 판매가능인지 판단
+        for detail in validated_data["details"]:
+            restaurant = detail["restaurant"]
+            # 가게 상태 점검
+            if restaurant["status"] != StatusCode.RESTAURANT_OPEN:
+                status = StatusCode.ORDER_FAILED
+                cancle_reason = restaurant["status"]
+                message = f"Menu {restaurant["id"]} is not open"
+            # 메뉴 상태 점검
+            if not status:
+                for menu in detail["menus"]:
+                    if menu["status"] != StatusCode.MENU_OPTION_AVAILABLE:
+                        status = StatusCode.ORDER_FAILED
+                        cancle_reason = menu["status"]
+                        message = f"Menu {menu["id"]} is not available for sale"
+
+        if status:
+            order_data = {
+                "delivery_address": validated_data["delivery_address"],
+                "user": validated_data["user"],
+                "store_request": "",
+                "rider_request": "",
+                "order_price": 0,
+                "delivery_fee": 0,
+                "total_price": 0,
+            }
+            Order(order_status=status, **order_data).save()
+            raise CustomNegativeResponseWithData(
+                message=message, 
+                data={"code":status,"fail": cancle_reason},
+                status=201
+            )
 
         return validated_data
 
