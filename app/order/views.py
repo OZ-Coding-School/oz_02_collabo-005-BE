@@ -36,7 +36,7 @@ class OrderCreateView(APIView):
             formatter.set_status_and_message(e.status, e.message)
         except CustomNegativeResponseWithData as e:
             formatter.set_status_and_message(e.status, e.message)
-            formatter.add_response_data({"error": e.data})
+            formatter.add_response_data({"data": e.data})
         except ValidationError as e:
             formatter.set_status_and_message(e.status_code, str(e))
         except IntegrityError as e:

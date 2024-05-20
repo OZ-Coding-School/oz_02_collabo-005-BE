@@ -17,6 +17,7 @@ class StatusCode:
     ORDER_PENDING = 300000                              # 주문 확인중
     ORDER_ACCEPTED = 300001                             # 주문 수락
     ORDER_REJECTED = 300002                             # 주문 거절
+    ORDER_FAILED = 300003                               # 주문 실패
     ORDER_CANCELLED_BY_STORE = 300091                   # 주문 취소 - 가게
     ORDER_CANCELLED_BY_CUSTOMER = 300092                # 주문 취소 - 고객
     ORDER_COOKING = 300101                              # 조리중
