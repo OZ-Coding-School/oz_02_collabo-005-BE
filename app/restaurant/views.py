@@ -28,64 +28,76 @@ class RestaurantGetListView(APIView):
         if is_validated_token:
 
             # Restaurant 테이블에서 id, name, picture값을 가져온다
-            restaurants = Restaurant.objects.exclude(status=StatusCode.RESTAURANT_SHUT_DOWN).values(
-                "id",
-                "name",
-                "description",
-                "delivery_fee",
-                "representative_menu_image",
-                "notice",
-                "status",
-            )
+            try:
+                cnt = 0
+                restaurants = Restaurant.objects.exclude(status=StatusCode.RESTAURANT_SHUT_DOWN).values(
+                    "id",
+                    "name",
+                    "description",
+                    "delivery_fee",
+                    "representative_menu_image",
+                    "notice",
+                    "status",
+                )
+                cnt += 1
 
-            # for restaurant in restaurants에서 빠져나온 값 들을 하나씩 List 형태로 저장한다.
-            response_data = []
+                # for restaurant in restaurants에서 빠져나온 값 들을 하나씩 List 형태로 저장한다.
+                response_data = []
+                cnt += 1
 
-            for restaurant in restaurants:
-                # 해시태그와 카테고리는 한 번 돌 때마다 새로운 리스트를 만듭니다.
-                hashtag_list = []
-                category_list = []
+                for restaurant in restaurants:
+                    # 해시태그와 카테고리는 한 번 돌 때마다 새로운 리스트를 만듭니다.
+                    hashtag_list = []
+                    category_list = []
+                    cnt += 1
 
-                # 각각의 클래스에서 레스토랑의 id 값을 가져와서,
-                # restaurants에서 가져온 id 값과 같은 데이터의 id 값을 저장합니다. (hashtag_ids, category_ids)
-                hashtag_ids = RestaurantHashtag.objects.filter(
-                    restaurant=restaurant["id"]
-                ).values_list("hashtag_id", flat=True)
-                category_ids = RestaurantCategory.objects.filter(
-                    restaurant=restaurant["id"]
-                ).values_list("category_id", flat=True)
+                    # 각각의 클래스에서 레스토랑의 id 값을 가져와서,
+                    # restaurants에서 가져온 id 값과 같은 데이터의 id 값을 저장합니다. (hashtag_ids, category_ids)
+                    hashtag_ids = RestaurantHashtag.objects.filter(
+                        restaurant=restaurant["id"]
+                    ).values_list("hashtag_id", flat=True)
+                    category_ids = RestaurantCategory.objects.filter(
+                        restaurant=restaurant["id"]
+                    ).values_list("category_id", flat=True)
 
-                # id 값을 사용하여 해시태그와 카테고리의 값을 가져옵니다.
-                # values_list('hashtag', flat=True)를 사용하여 바로 리스트로 값들을 가져옵니다.
-                for id in hashtag_ids:
-                    hashtag_value = Hashtag.objects.filter(id=id).values_list(
-                        "hashtag", flat=True
-                    )
-                    hashtag_list.extend(
-                        hashtag_value
-                    )  # extend를 사용하여 리스트 합치기
+                    # id 값을 사용하여 해시태그와 카테고리의 값을 가져옵니다.
+                    # values_list('hashtag', flat=True)를 사용하여 바로 리스트로 값들을 가져옵니다.
+                    for id in hashtag_ids:
+                        hashtag_value = Hashtag.objects.filter(id=id).values_list(
+                            "hashtag", flat=True
+                        )
+                        hashtag_list.extend(
+                            hashtag_value
+                        )  # extend를 사용하여 리스트 합치기
 
-                for id in category_ids:
-                    category_value = Category.objects.filter(id=id).values_list(
-                        "category", flat=True
-                    )
-                    category_list.extend(category_value)
+                    cnt += 1
+                    for id in category_ids:
+                        category_value = Category.objects.filter(id=id).values_list(
+                            "category", flat=True
+                        )
+                        category_list.extend(category_value)
 
-                # 각 테이블에서 가져온 컬럼 값들을 res에 저장하고 응답합니다.
-                res = {
-                    "id": restaurant["id"],
-                    "name": restaurant["name"],
-                    "image": Environments.OKIVERY_BUCKET_URL
-                    + restaurant["representative_menu_image"],
-                    "hashtag": hashtag_list,
-                    "category": category_list,
-                    "notice": restaurant["notice"],
-                    "status": restaurant["status"],
-                }
-                response_data.append(res)
+                    cnt += 1
+                    # 각 테이블에서 가져온 컬럼 값들을 res에 저장하고 응답합니다.
+                    res = {
+                        "id": restaurant["id"],
+                        "name": restaurant["name"],
+                        "image": Environments.OKIVERY_BUCKET_URL
+                        + restaurant["representative_menu_image"],
+                        "hashtag": hashtag_list,
+                        "category": category_list,
+                        "notice": restaurant["notice"],
+                        "status": restaurant["status"],
+                    }
+                    cnt += 1
+                    response_data.append(res)
+                    cnt += 1
 
-            stat = status.HTTP_200_OK
-            return Response(response_data, stat)
+                stat = status.HTTP_200_OK
+                cnt += 1
+                return Response(response_data, stat)
+            except Exception as e:
+                return Response({"error": str(e), "cnt": cnt})
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
