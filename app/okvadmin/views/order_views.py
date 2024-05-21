@@ -189,3 +189,176 @@ class OrderCancleView(APIView):
                 {"message": "Authentication failed"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+
+
+class OrderCooking(APIView):
+    """
+    주문 상태를 조리중으로 변경하는 API
+    """
+
+    def post(self, request, format=None):
+        order_id = request.data.get("order_id")
+
+        try:
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
+            return Response({"message": "Order not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if order.order_status != StatusCode.ORDER_ACCEPTED:
+            return Response({"message": "Order is not in an accepted state", "current_status": order.order_status}, status=status.HTTP_400_BAD_REQUEST)
+
+        order.order_status = StatusCode.ORDER_COOKING
+        order.save()
+
+        return Response({"message": "Order status updated to cooking"}, status=status.HTTP_200_OK)
+    
+
+class OrderCooked(APIView):
+    """
+    주문 상태를 조리완료로 변경하는 API
+    """
+
+    def post(self, request, format=None):
+        order_id = request.data.get('order_id')
+
+        try:
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
+            return Response({"message": "Order not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if order.order_status != StatusCode.ORDER_COOKING:
+            return Response({"message": "Order is not in a cooking state"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order.order_status = StatusCode.ORDER_COOKED
+        order.save()
+
+        # order_delivery 테이블에서 delivery 정보를 가져오기
+        try:
+            delivery = Delivery.objects.get(order=order)
+        except Delivery.DoesNotExist:
+            return Response({"message": "Delivery information not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # delivery_man_id에 따라 배달 상태 업데이트
+        if delivery.delivery_man_id is None:
+            delivery.delivery_status = StatusCode.DELIVERY_DISPATCH_PENDING
+        else:
+            delivery.delivery_status = StatusCode.DELIVERY_PICKUP_PENDING
+
+        delivery.save()
+
+        return Response({"message": "Order status updated to cooked and delivery status updated", "status": f"{delivery.delivery_status}"}, status=status.HTTP_200_OK)
+    
+
+
+class AssignDelivery(APIView):
+    """
+    배달 기사가 배차를 요청하는 API
+    """
+
+    def post(self, request, format=None):
+        order_id = request.data.get('order_id')
+        delivery_man_id = request.data.get('delivery_man_id')
+
+        try:
+            # 주문 정보 가져오기
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
+            return Response({"message": "Order not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 주문 상태 확인 (조리 중 또는 조리 완료 상태여야 함)
+        if order.order_status not in [StatusCode.ORDER_COOKING, StatusCode.ORDER_COOKED]:
+            return Response({"message": "Order is not in a valid state for delivery", "current_status": order.order_status}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # 배달 정보 가져오기
+            delivery = Delivery.objects.get(order=order)
+        except Delivery.DoesNotExist:
+            return Response({"message": "Delivery information not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 배달 상태 확인 (배차 대기 상태여야 함)
+        if delivery.delivery_status != StatusCode.DELIVERY_DISPATCH_PENDING:
+            return Response({"message": "Delivery is not in a dispatch pending state", "current_status": delivery.delivery_status}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 배달 기사 ID 업데이트 및 배달 상태 변경
+        delivery.delivery_man_id = delivery_man_id
+        delivery.delivery_status = StatusCode.DELIVERY_PICKUP_PENDING
+
+        delivery.save()
+
+        return Response({"message": "Delivery assigned and status updated to pickup pending"}, status=status.HTTP_200_OK)
+
+
+class OrderDelivering(APIView):
+    """
+    주문 상태를 배달중으로 변경하는 API
+    """
+
+    def post(self, request, format=None):
+        order_id = request.data.get('order_id')
+
+        try:
+            # 주문 정보 가져오기
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
+            return Response({"message": "Order not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 주문 상태 확인
+        if order.order_status != StatusCode.ORDER_COOKED:
+            return Response({"message": "Order is not in a cooked state", "current_status": order.order_status}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # 배달 정보 가져오기
+            delivery = Delivery.objects.get(order=order)
+        except Delivery.DoesNotExist:
+            return Response({"message": "Delivery information not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 배달 상태 확인
+        if delivery.delivery_status != StatusCode.DELIVERY_PICKUP_PENDING:
+            return Response({"message": "Delivery is not in a pickup pending state", "current_status": delivery.delivery_status}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 배달 상태를 배달중으로 업데이트
+        order.order_status = StatusCode.DELIVERY_DELIVERING  # 주문 상태를 배달중으로 업데이트
+        delivery.delivery_status = StatusCode.DELIVERY_DELIVERING  # 배달 상태를 배달중으로 업데이트
+
+        order.save()
+        delivery.save()
+
+        return Response({"message": "Order and delivery status updated to delivering"}, status=status.HTTP_200_OK)
+    
+
+class CompleteDelivery(APIView):
+    """
+    배달 상태를 배달완료로 변경하는 API
+    """
+
+    def post(self, request, format=None):
+        order_id = request.data.get('order_id')
+
+        try:
+            # 주문 정보 가져오기
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
+            return Response({"message": "Order not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 주문 상태 확인 (배달 중 상태여야 함)
+        if order.order_status != StatusCode.DELIVERY_DELIVERING:
+            return Response({"message": "Order is not in delivering state", "current_status": order.order_status}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # 배달 정보 가져오기
+            delivery = Delivery.objects.get(order=order)
+        except Delivery.DoesNotExist:
+            return Response({"message": "Delivery information not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 배달 상태 확인 (배달 중 상태여야 함)
+        if delivery.delivery_status != StatusCode.DELIVERY_DELIVERING:
+            return Response({"message": "Delivery is not in delivering state", "current_status": delivery.delivery_status}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 주문 상태와 배달 상태를 배달 완료로 업데이트
+        order.order_status = StatusCode.DELIVERY_COMPLETED  # 주문 상태를 배달 완료로 업데이트
+        delivery.delivery_status = StatusCode.DELIVERY_COMPLETED  # 배달 상태를 배달 완료로 업데이트
+
+        order.save()
+        delivery.save()
+
+        return Response({"message": "Order and delivery status updated to delivered"}, status=status.HTTP_200_OK)
