@@ -18,6 +18,16 @@ urlpatterns = [
     path("order/approve/", ov.OrderApprove.as_view(), name= "admin-order-approve"),
     # order/cancle/
     path("order/cancle/", ov.OrderCancleView.as_view(), name= "admin-order-cancle"),
+    # order/cooking/
+    path("order/cooking/", ov.OrderCooking.as_view(), name= "admin-order-cooking"),
+    # order/cooked/
+    path("order/cooked/", ov.OrderCooked.as_view(), name= "admin-order-cooked"),
+    # order/assign/
+    path("order/assign/", ov.AssignDelivery.as_view(), name= "admin-order-assign"),
+    # order/delivering/
+    path("order/delivering/", ov.OrderDelivering.as_view(), name= "admin-order-delivering"),
+    # order/completedelivery/
+    path("order/completedelivery/", ov.CompleteDelivery.as_view(), name= "admin-order-completedelivery"),
 
     # 테스트용 API
     # api/v1/admin/test/
