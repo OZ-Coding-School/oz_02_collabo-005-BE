@@ -37,15 +37,16 @@ class OrderListView(APIView):
 
         res = []
         for order in orders:
+            print(order.get_order_status_display())
             data = {
                 "id": order.id,
                 "address": order.delivery_address,
-                "status": order.order_status,
+                "status": order.get_order_status_display(),
                 "price": order.order_price,
                 "delivery_fee": order.delivery_fee,
                 "total_price": order.total_price,
                 "cancel_reason": order.cancle_reason,
-                "order_time": int(order.created_at.timestamp() * 1000),
+                "time": int(order.created_at.timestamp() * 1000),
             }
             res.append(data)
 

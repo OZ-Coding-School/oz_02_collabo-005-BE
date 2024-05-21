@@ -52,7 +52,7 @@ class OrderListView(APIView):
         formatter = JSONDataFormatter()
 
         user_id = request.user.id
-        orders = Order.objects.filter( ~Q(order_status=StatusCode.ORDER_FAILED, user=user_id))
+        orders = Order.objects.filter( ~Q(order_status=StatusCode.ORDER_FAILED), user=user_id)
         result = []
         for order in orders:
             details = Order_detail.objects.filter(order=order.id)
