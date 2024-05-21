@@ -46,13 +46,13 @@ class OrderCreateView(APIView):
 
         return Response(formatter.get_response_data(), formatter.status)
 
-
+from django.db.models import Q
 class OrderListView(APIView):
     def get(self, request):
         formatter = JSONDataFormatter()
 
         user_id = request.user.id
-        orders = Order.objects.filter(user=user_id)
+        orders = Order.objects.filter( ~Q(order_status=StatusCode.ORDER_FAILED, user=user_id))
         result = []
         for order in orders:
             details = Order_detail.objects.filter(order=order.id)
