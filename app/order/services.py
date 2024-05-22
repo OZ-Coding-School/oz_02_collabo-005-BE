@@ -118,9 +118,7 @@ class CartCheckService(BasicServiceClass):
 
         coor = self.request_data.get("coordinate", None)
         if coor:
-            delivery_fee = osu.get_delivery_fee(
-                coor, order_price
-            )
+            delivery_fee = osu.get_delivery_fee(coor, order_price)
         else:
             delivery_fee = 0
         data["order_price"] = order_price
@@ -143,8 +141,6 @@ class SaveOrderService(BasicServiceClass):
 
     def is_valid(self):
         validated_data = CartCheckService(self.request.data).get_response_data()
-        
-            
 
         validated_data["details"] = validated_data.pop("orders")
         validated_data["user"] = User.objects.get(id=self.request.user.id)
@@ -165,7 +161,7 @@ class SaveOrderService(BasicServiceClass):
             StatusCode.PAYMENT_OFFLINE_CASH,
         ):
             raise CustomBadRequestError("Payment method code is invalid")
-        
+
         # 가게 및 메뉴가 판매가능인지 판단
         status = None
         for detail in validated_data["details"]:
@@ -174,14 +170,16 @@ class SaveOrderService(BasicServiceClass):
             if restaurant["status"] != StatusCode.RESTAURANT_OPEN:
                 status = StatusCode.ORDER_FAILED
                 cancle_reason = restaurant["status"]
-                message = f"Restaurant {restaurant["id"]} is not open"
+                message = (
+                    f"Restaurant {restaurant['name']}({restaurant['id']}) is not open"
+                )
             # 메뉴 상태 점검
             if not status:
                 for menu in detail["menus"]:
                     if menu["status"] != StatusCode.MENU_OPTION_AVAILABLE:
                         status = StatusCode.ORDER_FAILED
                         cancle_reason = menu["status"]
-                        message = f"Menu {menu["id"]} is not available for sale"
+                        message = f"Menu {menu['name']}({menu['id']}) is not available for sale"
                         break
             if status:
                 break
@@ -195,12 +193,13 @@ class SaveOrderService(BasicServiceClass):
                 "order_price": 0,
                 "delivery_fee": 0,
                 "total_price": 0,
+                "cancle_reason": cancle_reason,
             }
             Order(order_status=status, **order_data).save()
             raise CustomNegativeResponseWithData(
-                message=message, 
-                data={"code":status,"fail": cancle_reason},
-                status=201
+                message=message,
+                data={"code": status, "fail": cancle_reason},
+                status=201,
             )
 
         return validated_data
@@ -297,7 +296,7 @@ class OrderDetailService(BasicServiceClass):
             "total_price": order.total_price,
             "store_request": order.store_request,
             "rider_request": order.rider_request,
-            "payment_method": Payment.objects.get(order=order).method
+            "payment_method": Payment.objects.get(order=order).method,
         }
 
 
@@ -338,7 +337,10 @@ class PaymentService(BasicServiceClass):
         """
         결제 상태와 실패시 사유를 저장
         """
-        if payment.method in (StatusCode.PAYMENT_OFFLINE_CARD, StatusCode.PAYMENT_OFFLINE_CASH):
+        if payment.method in (
+            StatusCode.PAYMENT_OFFLINE_CARD,
+            StatusCode.PAYMENT_OFFLINE_CASH,
+        ):
             payment.status = StatusCode.PAYMENT_OFFLINE
             order.order_status = StatusCode.PAYMENT_OFFLINE
             is_success = True
