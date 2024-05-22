@@ -30,14 +30,15 @@ class OrderListView(APIView):
         """
         oderListService = OrderListService()
         orders = oderListService.get_all()
-        is_new = request.GET.get("new", None)
-        print(is_new)
-        if is_new == "1":
-            orders = oderListService.get_new_list(orders)
+        state = request.GET.get("state", None)
+        if state and state in ["new", "progress"]:
+            if state == "new":
+                orders = oderListService.get_new_list(orders)
+            else:
+                orders = oderListService.get_progress_list(orders)
 
         res = []
         for order in orders:
-            print(order.get_order_status_display())
             data = {
                 "id": order.id,
                 "address": order.delivery_address,
@@ -121,6 +122,9 @@ class OrderApprove(APIView):
             )
             delivery.save()
 
+            order.order_status = StatusCode.ORDER_COOKING
+            order.save()
+
             # 직렬화 및 응답 반환
             return Response(
                 {"message": "Order Approve successfully"}, status=status.HTTP_200_OK
@@ -158,6 +162,7 @@ class OrderCancleView(APIView):
 
             # 상태 코드가 취소-가게, 취소-고객 중에 있는지 판단
             if status_code not in (
+                StatusCode.ORDER_REJECTED,
                 StatusCode.ORDER_CANCELLED_BY_STORE,
                 StatusCode.ORDER_CANCELLED_BY_CUSTOMER,
             ):
@@ -279,9 +284,11 @@ class OrderCooked(APIView):
         # delivery_man_id에 따라 배달 상태 업데이트
         if delivery.delivery_man_id is None:
             delivery.delivery_status = StatusCode.DELIVERY_DISPATCH_PENDING
+            order.order_status = StatusCode.DELIVERY_DISPATCH_PENDING
         else:
             delivery.delivery_status = StatusCode.DELIVERY_PICKUP_PENDING
-
+            order.order_status = StatusCode.DELIVERY_PICKUP_PENDING
+        order.save()
         delivery.save()
 
         return Response(
@@ -314,6 +321,7 @@ class AssignDelivery(APIView):
         if order.order_status not in [
             StatusCode.ORDER_COOKING,
             StatusCode.ORDER_COOKED,
+            StatusCode.DELIVERY_DISPATCH_PENDING
         ]:
             return Response(
                 {
@@ -348,6 +356,10 @@ class AssignDelivery(APIView):
 
         delivery.save()
 
+        if delivery.order.order_status == StatusCode.DELIVERY_DISPATCH_PENDING:
+            delivery.order.order_status=StatusCode.DELIVERY_PICKUP_PENDING
+            delivery.order.save()
+
         return Response(
             {"message": "Delivery assigned and status updated to pickup pending"},
             status=status.HTTP_200_OK,
@@ -371,7 +383,7 @@ class OrderDelivering(APIView):
             )
 
         # 주문 상태 확인
-        if order.order_status != StatusCode.ORDER_COOKED:
+        if order.order_status not in [StatusCode.ORDER_COOKED, StatusCode.DELIVERY_PICKUP_PENDING]:
             return Response(
                 {
                     "message": "Order is not in a cooked state",
